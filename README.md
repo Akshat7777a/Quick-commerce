@@ -125,6 +125,26 @@ Phone number is **required** at sign-up — the store needs it to confirm orders
 
 Checkout collects name, phone and address, and places the order through `place_order()`. The confirmation screen shows the order number (e.g. `LMO-261024-1001`) and instructs the customer to pay cash on delivery.
 
+## Install as an app (PWA)
+
+The store is installable straight to the home screen — no app store involved. An **Install app** button sits in the top bar of every page:
+
+- **Chrome / Edge (desktop & Android):** the button fires the browser's native install dialog.
+- **iPhone (Safari):** the button opens a 3-step guide — Share → *Add to Home Screen* → Add, since iOS offers no programmatic prompt.
+- Once installed the button hides itself and the app opens full-screen (`display: standalone`), with the offline fallback served by the service worker.
+
+What makes it installable:
+
+| File | Purpose |
+| --- | --- |
+| `public/manifest.webmanifest` | App name, icons, `standalone` display, start URL, shortcuts |
+| `public/sw.js` | Service worker: network-first navigations with offline fallback, cache-first hashed assets |
+| `public/icon-*.png`, `apple-touch-icon.png` | 192/512 icons plus maskable and iOS variants, generated from the favicon design by `.logs/gen-icons.mjs` |
+| `src/lib/pwa.ts` | `beforeinstallprompt` capture, standalone detection, SW registration |
+| `src/components/InstallButton.tsx` | The button and the how-to dialog |
+
+Browsers only offer installation over **HTTPS** (or `localhost`), so it activates automatically once deployed.
+
 ## Verifying the SQL locally
 
 The migrations are exercised end-to-end against an in-process Postgres (PGlite) with Supabase's `auth`/`storage` stubbed:

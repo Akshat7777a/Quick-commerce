@@ -16,6 +16,7 @@ import { useCart } from "../lib/cart";
 import { useStoreSettings } from "../lib/store";
 import { cn } from "../lib/format";
 import type { Category } from "../lib/types";
+import { InstallButton } from "./InstallButton";
 
 export function Header() {
   const { settings } = useStoreSettings();
@@ -53,8 +54,9 @@ export function Header() {
       <div className="bg-forest text-cream">
         <div className="container-page flex h-9 items-center justify-between gap-4 text-[11px] tracking-wide">
           <p className="truncate text-cream/85">{settings.announcement ?? "Cash on delivery available"}</p>
-          <div className="hidden shrink-0 items-center gap-5 text-cream/70 sm:flex">
-            <span className="inline-flex items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-3 text-cream/70 sm:gap-5">
+            <InstallButton />
+            <span className="hidden items-center gap-1.5 sm:inline-flex">
               <span
                 className={cn(
                   "size-1.5 rounded-full",
