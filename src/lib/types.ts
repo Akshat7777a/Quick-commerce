@@ -70,6 +70,14 @@ export type StoreSettings = {
   free_delivery_above: number;
   min_order: number;
   delivery_estimate: string | null;
+  /** "light" | "dark" | "system" — store-wide default (visitors may toggle locally). */
+  theme_mode: "light" | "dark" | "system" | null;
+  /** Festival/branding preset id from THEME_PRESETS ("default" = classic green). */
+  theme_preset: string | null;
+  /** Comma-separated PIN codes allowed to check out. */
+  serviceable_pincodes: string | null;
+  /** Delivery time choices offered at checkout, one label per entry. */
+  delivery_options: string[] | null;
   updated_at?: string;
 };
 
@@ -101,6 +109,8 @@ export type Order = {
   phone: string;
   address: string;
   notes: string | null;
+  /** Chosen delivery time slot (e.g. "Instant · within 30 minutes"). */
+  delivery_slot?: string | null;
   created_at: string;
   updated_at?: string;
   order_items?: OrderItem[];
@@ -144,6 +154,7 @@ export type PlaceOrderInput = {
   address: string;
   notes?: string;
   coupon?: string | null;
+  deliverySlot?: string | null;
 };
 
 export type PlaceOrderResult = {

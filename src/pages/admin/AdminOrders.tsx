@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Banknote, MapPin, Phone, ReceiptText } from "lucide-react";
+import { Banknote, Clock3, Copy, MapPin, MessageCircle, Phone, ReceiptText } from "lucide-react";
 import { api, errorMessage } from "../../lib/api";
+import { deliveryHandoffText } from "../../lib/delivery";
 import { useToast } from "../../lib/toast";
 import { ORDER_STATUS, cn, formatDateTime, inr } from "../../lib/format";
 import { AdminPageHeader } from "./AdminLayout";
@@ -18,6 +19,7 @@ export function AdminOrders() {
   const [selected, setSelected] = useState<Order | null>(null);
   const [draftStatus, setDraftStatus] = useState<OrderStatus>("placed");
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -51,6 +53,22 @@ export function AdminOrders() {
   const openOrder = (order: Order) => {
     setSelected(order);
     setDraftStatus(order.status);
+  };
+
+  const handoffText = useMemo(
+    () => (selected ? deliveryHandoffText(selected) : ""),
+    [selected],
+  );
+
+  const copyHandoff = async () => {
+    try {
+      await navigator.clipboard.writeText(handoffText);
+      setCopied(true);
+      toast("Delivery info copied — paste it to your delivery person");
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast("Couldn't access the clipboard — select the text and copy it", "error");
+    }
   };
 
   const updateStatus = async () => {
@@ -206,6 +224,11 @@ export function AdminOrders() {
                 <p className="mt-2 flex items-center gap-1.5 text-[11px] text-ink-soft">
                   <Banknote className="size-3.5" /> Cash on delivery
                 </p>
+                {selected.delivery_slot && (
+                  <p className="mt-2 flex items-center gap-1.5 text-[11px] text-ink-soft">
+                    <Clock3 className="size-3.5 text-forest" /> Deliver by {selected.delivery_slot}
+                  </p>
+                )}
                 {selected.notes && (
                   <p className="mt-2 rounded-lg bg-gold/10 px-2.5 py-2 text-[10.5px] leading-relaxed text-[#7a5a14]">
                     “{selected.notes}”
@@ -258,6 +281,32 @@ export function AdminOrders() {
                 <dd className="price font-semibold">{inr(selected.total)}</dd>
               </div>
             </dl>
+
+            <div>
+              <p className="label">Delivery handoff — for your delivery person</p>
+              <div className="rounded-xl border border-forest/25 bg-forest/[0.04] p-3.5">
+                <pre className="max-h-52 overflow-y-auto whitespace-pre-wrap font-mono text-[10.5px] leading-relaxed text-ink">
+                  {handoffText}
+                </pre>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" onClick={copyHandoff} className="btn btn-primary btn-sm">
+                    <Copy className="size-3.5" /> {copied ? "Copied!" : "Copy delivery info"}
+                  </button>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(handoffText)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-secondary btn-sm"
+                  >
+                    <MessageCircle className="size-3.5" /> Share on WhatsApp
+                  </a>
+                </div>
+                <p className="mt-2 text-[10px] leading-relaxed text-ink-soft">
+                  Everything in one block: who, where, when, what to collect in cash — copy it
+                  straight into your delivery person's chat.
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </Modal>

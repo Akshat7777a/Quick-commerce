@@ -207,6 +207,7 @@ export const api = {
             p_address: input.address,
             p_notes: input.notes ?? null,
             p_coupon: input.coupon ?? null,
+            p_delivery_slot: input.deliverySlot ?? null,
           }),
         ) as PlaceOrderResult,
       () => demo.placeOrder(input, userId),

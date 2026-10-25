@@ -263,6 +263,7 @@ export const demo = {
       phone: input.phone,
       address: input.address,
       notes: input.notes ?? null,
+      delivery_slot: input.deliverySlot ?? null,
       created_at: now.toISOString(),
       order_items: items,
     };

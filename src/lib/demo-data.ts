@@ -164,4 +164,17 @@ export const demoSettings: StoreSettings = {
   free_delivery_above: 499,
   min_order: 99,
   delivery_estimate: "Same-day delivery, 9 AM – 9 PM",
+  theme_mode: "light",
+  theme_preset: "default",
+  serviceable_pincodes: "312601",
+  delivery_options: [
+    "Instant · within 30 minutes",
+    "Within 1–2 hours",
+    "9:00 AM – 11:00 AM",
+    "11:00 AM – 1:00 PM",
+    "1:00 PM – 3:00 PM",
+    "3:00 PM – 5:00 PM",
+    "5:00 PM – 7:00 PM",
+    "7:00 PM – 9:00 PM",
+  ],
 };

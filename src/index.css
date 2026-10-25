@@ -294,6 +294,131 @@
   }
 }
 
+/* ==========================================================================
+   Dark mode — swaps the design tokens on <html class="dark">. Unlayered on
+   purpose so these win over Tailwind's @theme :root defaults.
+   ========================================================================== */
+html.dark {
+  --color-cream: #0f1511;
+  --color-cream-2: #161e18;
+  --color-sand: #1f2a23;
+  --color-ink: #ebeee6;
+  --color-ink-soft: #9ba595;
+  --color-line: #26312a;
+  --color-card: #141b16;
+  --color-forest: #22775a;
+  --color-forest-2: #2b8f68;
+  --color-moss: #8b9785;
+  --color-gold: #dcb25f;
+  --color-gold-soft: #33301f;
+  --color-clay: #d47a52;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 14px 32px -18px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 4px 10px rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.7);
+}
+
+html.dark .btn-primary {
+  background-color: #1c6b4e;
+}
+
+html.dark .btn-primary:hover:not(:disabled) {
+  background-color: #22775a;
+}
+
+html.dark .chip-active,
+html.dark .chip-active:hover {
+  background-color: #1c6b4e;
+  border-color: #1c6b4e;
+}
+
+html.dark .btn-secondary:hover:not(:disabled) {
+  background-color: rgb(255 253 248 / 0.06);
+}
+
+/* ==========================================================================
+   Festival theme presets — admin picks one, it lands as data-theme on <html>.
+   Light accents first, then the dark-mode variants (higher specificity).
+   ========================================================================== */
+html[data-theme="diwali"] {
+  --color-forest: #5b2a86;
+  --color-forest-2: #7438a8;
+  --color-gold: #f0b429;
+  --color-gold-soft: #f6e7c7;
+  --color-clay: #c2185b;
+}
+
+html[data-theme="holi"] {
+  --color-forest: #ad1457;
+  --color-forest-2: #d81b60;
+  --color-gold: #ffb300;
+  --color-gold-soft: #ffe7b8;
+  --color-clay: #8e24aa;
+}
+
+html[data-theme="christmas"] {
+  --color-forest: #b3261e;
+  --color-forest-2: #d32f2f;
+  --color-gold: #ffd54f;
+  --color-gold-soft: #fff3c4;
+  --color-clay: #2e7d32;
+}
+
+html[data-theme="eid"] {
+  --color-forest: #00695c;
+  --color-forest-2: #00897b;
+  --color-gold: #d4af37;
+  --color-gold-soft: #f4ecd2;
+  --color-clay: #1b5e20;
+}
+
+html[data-theme="republic"] {
+  --color-forest: #e65100;
+  --color-forest-2: #ef6c00;
+  --color-gold: #ffd54f;
+  --color-gold-soft: #ffecb3;
+  --color-clay: #138808;
+}
+
+html.dark[data-theme="diwali"] {
+  --color-forest: #a06bdc;
+  --color-forest-2: #b688e6;
+  --color-gold: #f0b429;
+  --color-gold-soft: #3a2b52;
+  --color-clay: #ef5da8;
+}
+
+html.dark[data-theme="holi"] {
+  --color-forest: #ef5f92;
+  --color-forest-2: #f57fb0;
+  --color-gold: #ffc24d;
+  --color-gold-soft: #4a3040;
+  --color-clay: #c07be0;
+}
+
+html.dark[data-theme="christmas"] {
+  --color-forest: #e05a4f;
+  --color-forest-2: #ee7a70;
+  --color-gold: #ffd54f;
+  --color-gold-soft: #453b1d;
+  --color-clay: #5cb85c;
+}
+
+html.dark[data-theme="eid"] {
+  --color-forest: #2fa08e;
+  --color-forest-2: #45b7a3;
+  --color-gold: #d4af37;
+  --color-gold-soft: #3c3a22;
+  --color-clay: #5cb85c;
+}
+
+html.dark[data-theme="republic"] {
+  --color-forest: #f08a3c;
+  --color-forest-2: #f7a05c;
+  --color-gold: #ffd54f;
+  --color-gold-soft: #453a1d;
+  --color-clay: #4caf50;
+}
+
 @layer utilities {
   .no-scrollbar {
     scrollbar-width: none;

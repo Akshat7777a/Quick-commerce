@@ -39,8 +39,9 @@ Migrations live in [supabase/migrations](supabase/migrations):
 | `20261024120100_seed.sql` | 8 categories, 38 products, 3 banners, starter coupons, default store settings |
 | `20261024130000_customer_directory.sql` | `admin_customers()` — admin-only customer directory with contact details, order counts, lifetime spend and last order |
 | `20261024140000_security_hardening.sql` | Hardening: merges duplicate cart lines in `place_order()`, input length/phone/cart-size caps, coupon row lock (usage-limit race), profile identity-column guard, least-privilege revokes (order-number sequence, `order_items` writes) |
+| `20261025110000_theme_delivery_area.sql` | **Migration 5 — run this next.** Adds `store_settings.theme_mode` (light/dark/system), `theme_preset` (festival presets), `serviceable_pincodes` (delivery area, default `312601`), `delivery_options` (checkout time slots) and `orders.delivery_slot`; redefines `place_order()` to reject out-of-area PIN codes and slots outside the admin's list |
 
-> **Status: connected.** All four migrations have already been applied to the `waiywwrqxegmhgwlxhkt` project (tables, RLS, seed data, storage bucket, customer directory and hardening are live), and the app reads from it. The steps below are kept for re-runs or a fresh project.
+> **Status: migration 5 pending.** Migrations 1–4 are already applied to the `waiywwrqxegmhgwlxhkt` project (tables, RLS, seed data, storage bucket, customer directory and hardening are live). **`20261025110000_theme_delivery_area.sql` still needs to be run** — until then the app falls back to local preview data for theme/delivery-area saves and checkout. The steps below are kept for re-runs or a fresh project.
 
 ### Run the migrations
 
@@ -74,7 +75,7 @@ The hardening migration closes the holes a review of the first schema found:
 - **Profile identity columns are frozen** for signed-in non-admins: a customer editing their own row can only change name/phone — never `email`, `id`, `created_at` or `role` (the SQL editor, which runs without a JWT, can still promote admins).
 - **Least privilege**: clients can no longer draw from `order_number_seq` or insert/delete `order_items` rows directly — sales lines are written only by `place_order()`.
 
-Everything is verified by [.logs/verify-sql.mjs](.logs/verify-sql.mjs) (35 checks against a local Postgres) and [.logs/verify-live.mjs](.logs/verify-live.mjs) (14 REST checks against the live project).
+Everything is verified by [.logs/verify-sql.mjs](.logs/verify-sql.mjs) (44 checks against a local Postgres, including the delivery-area and slot rules of migration 5) and [.logs/verify-live.mjs](.logs/verify-live.mjs) (14 REST checks against the live project).
 
 ## Making yourself admin
 
@@ -98,9 +99,13 @@ Roles are checked by `is_admin()` on every admin RLS policy, and customers canno
 - **Categories** — add / rename / reorder / remove
 - **Orders** — status pipeline: placed → confirmed → packed → out for delivery → delivered / cancelled
 - **Customers** — the customer database: phone, email, join date, order history, delivered count and lifetime spend (admin only; call links built in)
+- **Orders — delivery handoff** — every order modal contains a copy-ready block (name, phone, address, chosen delivery slot, itemised list and the exact cash to collect) with one-click **Copy delivery info** and **Share on WhatsApp**, so it can be pasted straight to your delivery person
 - **Banners** — hero carousel slides with scheduling and active toggle
 - **Coupons** — percent or flat, min order, max discount, usage limits, validity window
 - **Import & export** — CSV in and out for everything (see below)
+- **Store settings** — theme & appearance (light/dark/system default plus festival presets: Diwali, Holi, Christmas, Eid, Republic Day), delivery area (which PIN codes can order, default `312601` · Nimbahera), delivery time options (customisable checkout slots: instant, 1–2 hours, fixed time windows), opening hours, fees and storefront copy
+
+Customers get a light/dark toggle in the header; the admin's choice is the store-wide default and the festival preset recolours the whole storefront instantly.
 
 ## CSV import & export (`/admin/data`)
 
@@ -124,6 +129,11 @@ Phone number is **required** at sign-up — the store needs it to confirm orders
 ## Cash on delivery only
 
 Checkout collects name, phone and address, and places the order through `place_order()`. The confirmation screen shows the order number (e.g. `LMO-261024-1001`) and instructs the customer to pay cash on delivery.
+
+## Delivery area & delivery time
+
+- **Delivery area (PIN codes)** — only addresses whose 6-digit PIN code is in `store_settings.serviceable_pincodes` (default `312601` · Nimbahera, Rajasthan) can check out. Enforced twice: inline at checkout and again inside `place_order()`, so out-of-area orders are rejected even if the client is bypassed. Admins expand the area from **Store settings** by adding comma-separated PIN codes.
+- **Delivery time options** — checkout offers a slot picker instead of a single "9 AM – 9 PM" line: instant (30 minutes), within 1–2 hours, plus fixed windows (10 AM – 12 PM, etc.). The list is fully customisable in **Store settings → Delivery time options** (one per line), the choice is stored on the order (`orders.delivery_slot`), and `place_order()` rejects anything outside the admin's list.
 
 ## Install as an app (PWA)
 

@@ -3,8 +3,10 @@ import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-
 import {
   Home,
   LayoutGrid,
+  Moon,
   Search,
   ShoppingBag,
+  Sun,
   Tag,
   User,
   UserRound,
@@ -19,7 +21,7 @@ import type { Category } from "../lib/types";
 import { InstallButton } from "./InstallButton";
 
 export function Header() {
-  const { settings } = useStoreSettings();
+  const { settings, mode, toggleMode } = useStoreSettings();
   const { count, openCart } = useCart();
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -125,6 +127,19 @@ export function Header() {
                 Admin
               </Link>
             )}
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="grid size-10 place-items-center rounded-full text-ink-soft transition hover:bg-cream-2 hover:text-ink"
+              aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              title={mode === "dark" ? "Light mode" : "Dark mode"}
+            >
+              {mode === "dark" ? (
+                <Sun className="size-[17px]" />
+              ) : (
+                <Moon className="size-[17px]" />
+              )}
+            </button>
             <Link
               to={user ? "/account" : "/login"}
               className="grid size-10 place-items-center rounded-full text-ink-soft transition hover:bg-cream-2 hover:text-ink"

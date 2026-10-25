@@ -7,6 +7,7 @@ const db = new PGlite({ extensions: { pg_trgm, pgcrypto } });
 const init = fs.readFileSync("supabase/migrations/20261024120000_init.sql", "utf8");
 const seed = fs.readFileSync("supabase/migrations/20261024120100_seed.sql", "utf8");
 const hardening = fs.readFileSync("supabase/migrations/20261024140000_security_hardening.sql", "utf8");
+const area = fs.readFileSync("supabase/migrations/20261025110000_theme_delivery_area.sql", "utf8");
 
 let failures = 0;
 const check = (label, ok, detail = "") => {
@@ -56,9 +57,11 @@ try {
   await db.exec(seed);
   await db.exec(hardening);
   await db.exec(hardening); // must be idempotent
-  check("seed + hardening migrations execute (hardening twice)", true);
+  await db.exec(area);
+  await db.exec(area); // must be idempotent too
+  check("seed + hardening + delivery-area migrations execute (each twice)", true);
 } catch (error) {
-  check("seed + hardening migrations execute (hardening twice)", false, error.message);
+  check("seed + hardening + delivery-area migrations execute (each twice)", false, error.message);
   process.exit(1);
 }
 
@@ -96,12 +99,15 @@ const product = await one(
 );
 const before = await one("select used_count from public.coupons where code = 'FIRST15'");
 
+const SLOT = "Instant · within 30 minutes";
+const IN_AREA = "Flat 4B, Rose Apartments, Nimbahera, Chittorgarh, Rajasthan 312601";
+
 const placed = await one(
   `select public.place_order(
      $1::jsonb, 'Test Shopper', '+91 98765 43210',
-     'Flat 4B, Rose Apartments, 12 Market Road, Bengaluru 560001', 'Ring once', 'FIRST15'
+     $2, 'Ring once', 'FIRST15', $3
    ) as r`,
-  [JSON.stringify([{ product_id: product.id, quantity: 7 }])],
+  [JSON.stringify([{ product_id: product.id, quantity: 7 }]), IN_AREA, SLOT],
 );
 check("place_order returns an order", Boolean(placed.r?.order_number), placed.r?.order_number ?? JSON.stringify(placed.r));
 // subtotal 7 × 48 = 336, FIRST15 → 15% off (50.40, under the ₹150 cap), delivery ₹25 (< ₹499 free threshold)
@@ -114,6 +120,7 @@ check(
 
 const orderRow = await one("select * from public.orders where order_number = $1", [placed.r.order_number]);
 check("order persisted", Boolean(orderRow), orderRow?.order_number);
+check("delivery slot persisted", orderRow?.delivery_slot === SLOT, orderRow?.delivery_slot ?? "null");
 const itemCount = await one("select count(*)::int as n from public.order_items where order_id = $1", [orderRow.id]);
 check("order items persisted", itemCount.n === 1);
 const stockAfter = await one("select stock from public.products where id = $1", [product.id]);
@@ -193,11 +200,11 @@ await db.exec(`select set_config('request.jwt.claim.sub', '${userId}', false); s
 const banana2 = await one("select id, price, stock from public.products where slug = 'fresh-bananas-6pc'");
 const dup = await one(
   `select public.place_order($1::jsonb, 'Test Shopper', '+91 98765 43210',
-     'Flat 4B, Rose Apartments, 12 Market Road, Bengaluru 560001', null, null) as r`,
+     $2, null, null, $3) as r`,
   [JSON.stringify([
     { product_id: banana2.id, quantity: 3 },
     { product_id: banana2.id, quantity: 2 },
-  ])],
+  ]), IN_AREA, SLOT],
 );
 const dupSubtotal = Math.round(Number(dup.r?.subtotal) * 100) / 100;
 check("duplicate cart lines merge in subtotal", dupSubtotal === banana2.price * 5, `got ${dup.r?.subtotal}, expected ${banana2.price * 5}`);
@@ -264,6 +271,54 @@ check("self-update cannot change email", otherAfter.email === otherBefore.email,
 check("self-update cannot backdate join date", new Date(otherAfter.created_at).getTime() === new Date(otherBefore.created_at).getTime());
 check("self-update can still change name", otherAfter.full_name === "Renamed", otherAfter.full_name);
 await db.exec(`update public.profiles set full_name = 'Other Shopper' where id = '${otherId}'`);
+
+// --- Delivery area + delivery options --------------------------------
+await db.exec("reset role");
+await db.exec(`select set_config('request.jwt.claim.sub', '${userId}', false); set role authenticated;`);
+const settingsRow = await one("select * from public.store_settings where id = 1");
+check(
+  "theme + delivery settings columns exist",
+  settingsRow.theme_mode === "light" &&
+    settingsRow.theme_preset === "default" &&
+    settingsRow.serviceable_pincodes === "312601" &&
+    Array.isArray(settingsRow.delivery_options) && settingsRow.delivery_options.length >= 4,
+  `${settingsRow.theme_mode}/${settingsRow.theme_preset}/${settingsRow.serviceable_pincodes}`,
+);
+
+const banana3 = await one("select id from public.products where slug = 'fresh-bananas-6pc'");
+const attempt = async (address, slot) => {
+  try {
+    const r = await one(
+      `select public.place_order($1::jsonb, 'Test Shopper', '+91 98765 43210', $2, null, null, $3) as r`,
+      [JSON.stringify([{ product_id: banana3.id, quantity: 3 }]), address, slot],
+    );
+    return { ok: true, r: r.r };
+  } catch (error) {
+    return { ok: false, message: error.message };
+  }
+};
+
+const outside = await attempt("Somewhere, Bengaluru 560001", SLOT);
+check("out-of-area PIN code rejected", !outside.ok && /deliver only to PIN/i.test(outside.message), outside.message || "accepted");
+const noPin = await attempt("Market Road, Nimbahera", SLOT);
+check("address without PIN code rejected", !noPin.ok && /6-digit PIN code/i.test(noPin.message), noPin.message || "accepted");
+const badSlot = await attempt(IN_AREA, "whenever they feel like it");
+check("unknown delivery slot rejected", !badSlot.ok && /delivery time option/i.test(badSlot.message), badSlot.message || "accepted");
+const noSlot = await attempt(IN_AREA, null);
+check("missing delivery slot rejected", !noSlot.ok && /delivery time option/i.test(noSlot.message), noSlot.message || "accepted");
+const inArea = await attempt(IN_AREA, "5:00 PM – 7:00 PM");
+check("in-area order with a chosen slot succeeds", inArea.ok && Boolean(inArea.r?.order_number), inArea.message ?? inArea.r?.order_number);
+const inAreaRow = inArea.ok
+  ? await one("select delivery_slot from public.orders where order_number = $1", [inArea.r.order_number])
+  : null;
+check("chosen slot stored on the order", inAreaRow?.delivery_slot === "5:00 PM – 7:00 PM", inAreaRow?.delivery_slot ?? "null");
+
+// Admin expands the delivery area → the new PIN code starts working.
+await db.exec("reset role");
+await db.exec("update public.store_settings set serviceable_pincodes = '312601, 312001' where id = 1");
+await db.exec(`select set_config('request.jwt.claim.sub', '${userId}', false); set role authenticated;`);
+const expanded = await attempt("Gandhinagar, Udaipur, Rajasthan 312001", SLOT);
+check("admin-expanded PIN code accepted", expanded.ok, expanded.message ?? "ok");
 
 console.log(`\n${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}`);
 process.exit(failures === 0 ? 0 : 1);

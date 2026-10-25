@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Banknote,
   CheckCircle2,
+  Clock3,
   MapPin,
   PackageCheck,
   ShieldCheck,
@@ -14,6 +15,12 @@ import {
 import { api, errorMessage } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useCart } from "../lib/cart";
+import {
+  STORE_CITY_LABEL,
+  deliveryOptions,
+  extractPincode,
+  serviceablePincodes,
+} from "../lib/delivery";
 import { useStoreSettings } from "../lib/store";
 import { useToast } from "../lib/toast";
 import { inr } from "../lib/format";
@@ -43,9 +50,14 @@ export function Checkout() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [code, setCode] = useState("");
+  const [slot, setSlot] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PlaceOrderResult | null>(null);
+
+  const pinList = serviceablePincodes(settings);
+  const slotOptions = deliveryOptions(settings);
+  const chosenSlot = slot || slotOptions[0] || "";
 
   useEffect(() => {
     if (profile) {
@@ -107,6 +119,10 @@ export function Checkout() {
                 <dt className="shrink-0 text-ink-soft">Delivering to</dt>
                 <dd className="text-right leading-relaxed text-ink">{address}</dd>
               </div>
+              <div className="flex items-start justify-between gap-6">
+                <dt className="shrink-0 text-ink-soft">Delivery time</dt>
+                <dd className="text-right leading-relaxed text-ink">{chosenSlot}</dd>
+              </div>
             </dl>
             <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
               <button
@@ -158,6 +174,14 @@ export function Checkout() {
     if (name.trim().length < 2) return setError("Please add the name for this delivery.");
     if (digits.length < 10) return setError("Please enter a valid phone number.");
     if (address.trim().length < 10) return setError("Please add a complete delivery address.");
+    const pin = extractPincode(address);
+    if (!pin) return setError("Please add a 6-digit PIN code to your delivery address.");
+    if (!pinList.includes(pin)) {
+      return setError(
+        `We currently deliver only to PIN ${pinList.join(", ")} — our store is in ${STORE_CITY_LABEL}. Please update the address.`,
+      );
+    }
+    if (!chosenSlot) return setError("Please choose a delivery time.");
 
     setBusy(true);
     try {
@@ -169,6 +193,7 @@ export function Checkout() {
           address: address.trim(),
           notes: notes.trim() || undefined,
           coupon: coupon?.code ?? null,
+          deliverySlot: chosenSlot,
         },
         user.id,
       );
@@ -257,6 +282,23 @@ export function Checkout() {
                   placeholder="Flat, building, street, landmark, city, pincode"
                   className="input resize-none leading-relaxed"
                 />
+                {(() => {
+                  const pin = extractPincode(address);
+                  const outside = pin !== null && !pinList.includes(pin);
+                  if (outside) {
+                    return (
+                      <p className="mt-1.5 text-[11px] leading-relaxed text-clay">
+                        We don't deliver to PIN {pin} yet. We currently serve PIN{" "}
+                        {pinList.join(", ")} ({STORE_CITY_LABEL}).
+                      </p>
+                    );
+                  }
+                  return (
+                    <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-soft">
+                      {pin ? `PIN ${pin} — ` : ""}We deliver to PIN {pinList.join(", ")} · {STORE_CITY_LABEL}.
+                    </p>
+                  );
+                })()}
               </label>
               <label className="block sm:col-span-2">
                 <span className="label">Notes for the shop (optional)</span>
@@ -267,6 +309,49 @@ export function Checkout() {
                   className="input"
                 />
               </label>
+            </div>
+          </section>
+
+          <section className="card p-5 sm:p-6">
+            <div className="flex items-center gap-2.5">
+              <Clock3 className="size-4 text-forest" />
+              <h2 className="text-xl text-ink">Delivery time</h2>
+            </div>
+            <p className="mt-1 text-[11.5px] leading-relaxed text-ink-soft">
+              Choose when the basket should arrive — we'll work to that slot.
+            </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {slotOptions.map((option) => {
+                const active = chosenSlot === option;
+                return (
+                  <label
+                    key={option}
+                    className={
+                      "flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition " +
+                      (active
+                        ? "border-forest bg-forest/[0.05]"
+                        : "border-line hover:border-ink/30")
+                    }
+                  >
+                    <input
+                      type="radio"
+                      name="delivery-slot"
+                      className="sr-only"
+                      checked={active}
+                      onChange={() => setSlot(option)}
+                    />
+                    <span
+                      className={
+                        "grid size-4 shrink-0 place-items-center rounded-full border-2 " +
+                        (active ? "border-forest" : "border-ink-soft/50")
+                      }
+                    >
+                      {active && <span className="size-2 rounded-full bg-forest" />}
+                    </span>
+                    <span className="text-[12.5px] leading-snug text-ink">{option}</span>
+                  </label>
+                );
+              })}
             </div>
           </section>
 
