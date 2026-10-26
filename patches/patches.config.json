@@ -1,0 +1,4 @@
+{
+  "note": "Global patches configuration. Each patch can also be turned off in its own manifest.json; this file is the quick switch. disabled: [] means every installed patch with enabled:true runs.",
+  "disabled": []
+}

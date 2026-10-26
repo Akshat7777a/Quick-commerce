@@ -25,6 +25,7 @@ import { AdminBanners } from "./pages/admin/AdminBanners";
 import { AdminCoupons } from "./pages/admin/AdminCoupons";
 import { AdminData } from "./pages/admin/AdminData";
 import { AdminSettings } from "./pages/admin/AdminSettings";
+import { patchRoutes, PatchIsland } from "./lib/patch-loader";
 
 /**
  * Scroll memory: the reader's place survives a reload or a browser-discarded
@@ -83,7 +84,21 @@ export function App() {
             <CartProvider>
               <ScrollMemory />
               <Routes>
+                {/* Patches may add whole pages. Bare ones render outside the
+                    storefront shell; the rest appear inside it. Each is in an
+                    ErrorBoundary island: a crash stays inside one patch. */}
+                {patchRoutes()
+                  .filter((route) => route.bare)
+                  .map((route) => (
+                    <Route key={route.path} path={route.path} element={<PatchIsland>{route.element}</PatchIsland>} />
+                  ))}
                 <Route element={<StoreLayout />}>
+                  {/* Patch pages that need the storefront shell. */}
+                  {patchRoutes()
+                    .filter((route) => !route.bare)
+                    .map((route) => (
+                      <Route key={route.path} path={route.path} element={<PatchIsland>{route.element}</PatchIsland>} />
+                    ))}
                   <Route index element={<Home />} />
                   <Route path="/shop" element={<Shop />} />
                   <Route path="/product/:slug" element={<ProductPage />} />

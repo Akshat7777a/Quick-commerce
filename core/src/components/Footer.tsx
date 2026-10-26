@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Banknote, Clock3, MapPin, Phone } from "lucide-react";
 import { useStoreSettings } from "../lib/store";
+import { PatchSlot } from "../lib/patch-loader";
 
 export function Footer() {
   const { settings } = useStoreSettings();
@@ -63,6 +64,9 @@ export function Footer() {
             </ul>
           </div>
         </div>
+
+        {/* Optional patch line: store notice, festival greeting, etc. */}
+        <PatchSlot name="footer-note" />
 
         <div className="mt-12 flex flex-col gap-3 border-t border-cream/10 pt-6 text-[11px] text-cream/45 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} L MART ONLINE. Made for the neighbourhood.</p>

@@ -26,6 +26,7 @@ import { useStoreSettings } from "../lib/store";
 import { useToast } from "../lib/toast";
 import { inr } from "../lib/format";
 import { EmptyState, ProductImage, Spinner } from "../components/ui";
+import { PatchSlot, runPatchHooks } from "../lib/patch-loader";
 import type { PlaceOrderResult } from "../lib/types";
 
 /** Half-filled delivery details survive a reload or a discarded background tab. */
@@ -195,6 +196,20 @@ export function Checkout() {
 
     setBusy(true);
     try {
+      // Patches get a veto before the order is created (blocking: a throw
+      // aborts the submit; the message lands in the normal error box).
+      try {
+        await runPatchHooks("before-checkout", {
+          items,
+          total,
+          phone: phone.trim(),
+          address: address.trim(),
+          slot: chosenSlot,
+        }, { blocking: true });
+      } catch (hookError) {
+        const message = hookError instanceof Error ? hookError.message : "We couldn't check that order.";
+        return setError(message);
+      }
       const placed = await api.placeOrder(
         {
           items: items.map((item) => ({ product_id: item.product.id, quantity: item.quantity })),
@@ -212,6 +227,7 @@ export function Checkout() {
       removeKey(DRAFT_KEY); // placed: the half-filled form no longer applies
       toast("Order placed — cash on delivery");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      await runPatchHooks("after-checkout", { order: placed });
     } catch (caught) {
       setError(errorMessage(caught, "We couldn't place your order. Please try again."));
     } finally {
@@ -393,6 +409,9 @@ export function Checkout() {
             {settings.delivery_estimate ?? "Same-day delivery"} · Free over {inr(settings.free_delivery_above)}
           </div>
         </div>
+
+        {/* Optional patch content ahead of the order summary. */}
+        <PatchSlot name="checkout-before-summary" />
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="card overflow-hidden">

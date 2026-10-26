@@ -17,6 +17,7 @@ import {
   type ThemeMode,
 } from "./theme";
 import type { StoreSettings } from "./types";
+import { patchTokens } from "./patch-loader";
 
 type StoreContextValue = {
   settings: StoreSettings;
@@ -100,6 +101,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     applyTheme(mode, settings.theme_preset);
+    // Patch theme-token overrides ride along on every theme change, after the
+    // core tokens, so a patch (e.g. a festival palette) can adjust colours
+    // without touching core files. Re-applied defensively on re-render.
+    for (const [key, value] of Object.entries(patchTokens())) {
+      document.documentElement.style.setProperty(key, value);
+    }
   }, [mode, settings.theme_preset]);
 
   // Follow OS preference live while the resolved mode is "system".

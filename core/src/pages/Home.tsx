@@ -16,6 +16,7 @@ import { BannerCarousel } from "../components/BannerCarousel";
 import { CouponCard } from "../components/CouponCard";
 import { ProductCard } from "../components/ProductCard";
 import { ProductGridSkeleton } from "../components/ui";
+import { PatchSlot } from "../lib/patch-loader";
 import type { Banner, Category, Coupon, Product } from "../lib/types";
 
 function SectionHead({
@@ -103,6 +104,8 @@ export function Home() {
 
   return (
     <div>
+      {/* Optional patch content above everything (campaign ribbon, notice). */}
+      <PatchSlot name="home-top" />
       <BannerCarousel banners={banners} />
 
       {/* Trust strip */}
