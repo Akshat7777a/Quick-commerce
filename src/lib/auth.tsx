@@ -48,6 +48,16 @@ function fallbackProfile(user: AuthUser): Profile {
   };
 }
 
+/**
+ * Same user identity must be the same object: token refreshes fire
+ * onAuthStateChange with a fresh session every few minutes, and a new user
+ * object here would re-fetch the profile and re-render every consumer. Only a
+ * real sign-in/out (id or email change) produces a new value.
+ */
+function sameUser(a: AuthUser | null, b: AuthUser | null): boolean {
+  return a?.id === b?.id && a?.email === b?.email;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -66,19 +76,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-      setUser(
-        session?.user ? { id: session.user.id, email: session.user.email ?? null } : null,
-      );
+      const next = session?.user
+        ? { id: session.user.id, email: session.user.email ?? null }
+        : null;
+      setUser((current) => (sameUser(current, next) ? current : next)); // stable through token refresh
       setAuthReady(true);
     });
 
     void supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      setUser(
-        data.session?.user
-          ? { id: data.session.user.id, email: data.session.user.email ?? null }
-          : null,
-      );
+      const next = data.session?.user
+        ? { id: data.session.user.id, email: data.session.user.email ?? null }
+        : null;
+      setUser((current) => (sameUser(current, next) ? current : next));
       setAuthReady(true);
     });
 

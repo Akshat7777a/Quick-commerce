@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import { CartProvider } from "./lib/cart";
 import { StoreProvider } from "./lib/store";
 import { ToastProvider } from "./lib/toast";
+import { readJSON, writeJSON, sessionStore } from "./lib/storage";
 import { StoreLayout } from "./components/StoreLayout";
 import { Home } from "./pages/Home";
 import { Shop } from "./pages/Shop";
@@ -25,11 +26,51 @@ import { AdminCoupons } from "./pages/admin/AdminCoupons";
 import { AdminData } from "./pages/admin/AdminData";
 import { AdminSettings } from "./pages/admin/AdminSettings";
 
-function ScrollToTop() {
+/**
+ * Scroll memory: the reader's place survives a reload or a browser-discarded
+ * background tab, while ordinary route changes still jump to the top.
+ */
+const SCROLL_KEY = "lmart.scroll.v1";
+
+function ScrollMemory() {
   const { pathname } = useLocation();
+  const mounted = useRef(false);
+
   useEffect(() => {
+    if (!mounted.current) {
+      // First render after a load/restore: put the reader back where they were.
+      mounted.current = true;
+      const saved = readJSON<{ path: string; y: number }>(SCROLL_KEY, sessionStore);
+      if (saved && saved.path === pathname && saved.y > 0) {
+        requestAnimationFrame(() => window.scrollTo({ top: saved.y, behavior: "instant" as ScrollBehavior }));
+      }
+      return;
+    }
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
+
+  useEffect(() => {
+    let rateLimited = false;
+    const save = () => {
+      if (rateLimited) return;
+      rateLimited = true;
+      window.setTimeout(() => {
+        rateLimited = false;
+      }, 300);
+      writeJSON(SCROLL_KEY, { path: pathname, y: window.scrollY }, sessionStore);
+    };
+    const onHide = () => writeJSON(SCROLL_KEY, { path: pathname, y: window.scrollY }, sessionStore);
+    window.addEventListener("scroll", save, { passive: true });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") onHide();
+    });
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      window.removeEventListener("scroll", save);
+      window.removeEventListener("pagehide", onHide);
+    };
+  }, [pathname]);
+
   return null;
 }
 
@@ -40,7 +81,7 @@ export function App() {
         <StoreProvider>
           <AuthProvider>
             <CartProvider>
-              <ScrollToTop />
+              <ScrollMemory />
               <Routes>
                 <Route element={<StoreLayout />}>
                   <Route index element={<Home />} />

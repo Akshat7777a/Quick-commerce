@@ -19,6 +19,7 @@ import { useDemoMode } from "../../lib/demo-mode";
 import { useStoreSettings } from "../../lib/store";
 import { cn } from "../../lib/format";
 import { Spinner } from "../../components/ui";
+import { ErrorBoundary } from "../../components/ErrorBoundary";
 
 const nav = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, end: true },
@@ -200,7 +201,9 @@ export function AdminLayout() {
               </p>
             </div>
           )}
-          <Outlet />
+          <ErrorBoundary variant="section" name="admin-section">
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

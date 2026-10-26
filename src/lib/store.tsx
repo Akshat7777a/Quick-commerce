@@ -52,6 +52,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     void refresh();
   }, [refresh]);
 
+  // Returning to the tab: refresh silently, in place, at most once a minute.
+  // Never a full-page loader and never a scroll jump, so the customer's
+  // attention and position are untouched.
+  useEffect(() => {
+    let lastRefresh = Date.now();
+    let pending = false;
+    const maybeRefresh = () => {
+      if (pending) return;
+      const elapsed = Date.now() - lastRefresh;
+      if (elapsed < 60_000) return;
+      pending = true;
+      setTimeout(() => {
+        pending = false;
+        lastRefresh = Date.now();
+        void refresh();
+      }, 800); // wait a beat so the tab-focus repainter settles first
+    };
+    const onVisibility = () => {
+      if (!document.hidden) maybeRefresh();
+    };
+    window.addEventListener("focus", maybeRefresh);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", maybeRefresh);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [refresh]);
+
   const save = useCallback(async (patch: Partial<StoreSettings>) => {
     const updated = await api.saveSettings(patch);
     setSettings(updated);

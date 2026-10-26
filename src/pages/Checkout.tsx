@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { readJSON, removeKey, writeJSON } from "../lib/storage";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -27,6 +28,10 @@ import { inr } from "../lib/format";
 import { EmptyState, ProductImage, Spinner } from "../components/ui";
 import type { PlaceOrderResult } from "../lib/types";
 
+/** Half-filled delivery details survive a reload or a discarded background tab. */
+const DRAFT_KEY = "lmart.checkout.draft.v1";
+type Draft = { name?: string; phone?: string; address?: string; notes?: string; slot?: string };
+
 export function Checkout() {
   const { user, profile, loading: authLoading } = useAuth();
   const {
@@ -45,16 +50,21 @@ export function Checkout() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [notes, setNotes] = useState("");
+  const [name, setName] = useState(() => readJSON<Draft>(DRAFT_KEY)?.name ?? "");
+  const [phone, setPhone] = useState(() => readJSON<Draft>(DRAFT_KEY)?.phone ?? "");
+  const [address, setAddress] = useState(() => readJSON<Draft>(DRAFT_KEY)?.address ?? "");
+  const [notes, setNotes] = useState(() => readJSON<Draft>(DRAFT_KEY)?.notes ?? "");
   const [code, setCode] = useState("");
-  const [slot, setSlot] = useState("");
+  const [slot, setSlot] = useState(() => readJSON<Draft>(DRAFT_KEY)?.slot ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PlaceOrderResult | null>(null);
 
+  // The draft is saved as the customer types, so a reload, a switch to another
+  // tab, or a browser-discarded background tab comes back exactly as left.
+  useEffect(() => {
+    writeJSON(DRAFT_KEY, { name, phone, address, notes, slot } satisfies Draft);
+  }, [name, phone, address, notes, slot]);
   const pinList = serviceablePincodes(settings);
   const slotOptions = deliveryOptions(settings);
   const chosenSlot = slot || slotOptions[0] || "";
@@ -199,6 +209,7 @@ export function Checkout() {
       );
       setResult(placed);
       clear();
+      removeKey(DRAFT_KEY); // placed: the half-filled form no longer applies
       toast("Order placed — cash on delivery");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (caught) {
