@@ -13,6 +13,7 @@ import {
   Ticket,
   Upload,
   Users,
+  X,
 } from "lucide-react";
 import { api, errorMessage } from "../../lib/api";
 import { useToast } from "../../lib/toast";
@@ -180,7 +181,7 @@ export function AdminData() {
       clearFile();
       await refreshCatalogue();
     } catch (caught) {
-      toast(errorMessage(caught, "Import failed — nothing was partially applied"), "error");
+      toast(errorMessage(caught, "Import failed: nothing was partially applied"), "error");
     } finally {
       setImporting(false);
     }
@@ -191,7 +192,7 @@ export function AdminData() {
       <AdminPageHeader
         eyebrow="Data"
         title="Import & export"
-        description="Move your catalogue and sales data in and out as CSV — import products straight from your billing software, export anything to Excel."
+        description="Move your catalogue and sales data in and out as CSV: import products straight from your billing software, export anything to Excel."
       />
 
       {/* ------------------------------------------------------------- import */}
@@ -202,7 +203,7 @@ export function AdminData() {
             <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-ink-soft">
               Export a product list from your existing software as CSV (or use a file exported from
               this store) and upload it here. Matching happens on{" "}
-              <span className="font-medium text-ink">slug</span> — matching rows are updated, new
+              <span className="font-medium text-ink">slug</span>: matching rows are updated, new
               rows are created. Only <span className="font-medium text-ink">name</span> and{" "}
               <span className="font-medium text-ink">price</span> are required.
             </p>
@@ -232,7 +233,7 @@ export function AdminData() {
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cream-2 px-3 py-1.5 text-[11px] text-ink">
               <FileText className="size-3.5" /> {fileName}
               <button type="button" onClick={clearFile} className="text-ink-soft hover:text-clay" aria-label="Remove file">
-                ✕
+                <X className="size-3.5" aria-hidden="true" />
               </button>
             </span>
           )}
@@ -334,14 +335,14 @@ export function AdminData() {
                               </span>
                             </td>
                             <td className="max-w-[14rem] px-3 py-2">
-                              <span className="block truncate text-ink">{row.payload.name || "—"}</span>
+                              <span className="block truncate text-ink">{row.payload.name || "-"}</span>
                               {hasError && (
                                 <span className="mt-0.5 block text-[10px] leading-snug text-clay">
                                   {row.errors.join(" · ")}
                                 </span>
                               )}
                             </td>
-                            <td className="px-3 py-2 text-ink-soft">{row.category_ref ?? "—"}</td>
+                            <td className="px-3 py-2 text-ink-soft">{row.category_ref ?? "-"}</td>
                             <td className="px-3 py-2 text-right text-ink">₹{row.payload.price}</td>
                             <td className="px-3 py-2 text-right text-ink-soft">{row.payload.stock}</td>
                           </tr>
@@ -389,7 +390,7 @@ export function AdminData() {
                     Cancel
                   </button>
                   {validRows.length === 0 && errorRows.length > 0 && (
-                    <p className="text-[11.5px] text-clay">No valid rows to import — fix the file and re-upload.</p>
+                    <p className="text-[11.5px] text-clay">No valid rows to import. Fix the file and re-upload.</p>
                   )}
                 </div>
               </>
@@ -405,7 +406,7 @@ export function AdminData() {
             <p className="eyebrow">Export</p>
             <h2 className="mt-1 text-2xl text-ink">Download anything as CSV</h2>
             <p className="mt-1 text-[12.5px] text-ink-soft">
-              Standard CSV files — open them in Excel, Google Sheets or your own software.
+              Standard CSV files: open them in Excel, Google Sheets or your own software.
             </p>
           </div>
         </div>

@@ -40,7 +40,7 @@ function area(primary: MaybeStorage, fallback: MaybeStorage): StorageArea {
       try {
         fallback?.setItem(key, value);
       } catch {
-        /* storage unavailable — the app keeps working from memory */
+        /* storage unavailable, the app keeps working from memory */
       }
     },
     removeItem(key) {

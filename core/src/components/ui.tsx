@@ -40,7 +40,7 @@ export function Modal({
   return createPortal(
     <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-6">
       <div
-        className="absolute inset-0 bg-ink/45 backdrop-blur-[2px] animate-fade-in"
+        className="absolute inset-0 bg-ink/45 animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -64,7 +64,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-full border border-line p-2 text-ink-soft transition hover:border-ink hover:text-ink"
+            className="grid size-11 place-items-center rounded-md border border-line text-ink-soft transition hover:border-ink hover:text-ink"
           >
             <X className="size-4" />
           </button>
@@ -141,7 +141,7 @@ export function QtyStepper({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full border",
+        "inline-flex items-center rounded-md border",
         tone === "forest"
           ? "border-cream/25 bg-cream/10 text-cream"
           : "border-line bg-card text-ink",
@@ -152,20 +152,20 @@ export function QtyStepper({
         onClick={() => onChange(value - 1)}
         aria-label="Decrease quantity"
         className={cn(
-          "grid size-8 place-items-center rounded-full transition",
+          "grid size-11 place-items-center rounded-md transition",
           tone === "forest" ? "hover:bg-cream/15" : "hover:bg-cream-2",
         )}
       >
         <Minus className="size-3.5" />
       </button>
-      <span className="w-6 text-center text-[13px] font-medium tabular-nums">{value}</span>
+      <span className="min-w-8 text-center text-base font-medium tabular-nums">{value}</span>
       <button
         type="button"
         onClick={() => onChange(Math.min(value + 1, max))}
         disabled={value >= max}
         aria-label="Increase quantity"
         className={cn(
-          "grid size-8 place-items-center rounded-full transition disabled:opacity-40",
+          "grid size-11 place-items-center rounded-md transition disabled:opacity-40",
           tone === "forest" ? "hover:bg-cream/15" : "hover:bg-cream-2",
         )}
       >
@@ -236,12 +236,10 @@ export function ProductImage({
   src,
   alt,
   className,
-  emoji = "🛍️",
 }: {
   src?: string | null;
   alt: string;
   className?: string;
-  emoji?: string;
 }) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -250,13 +248,15 @@ export function ProductImage({
     return (
       <div
         className={cn(
-          "grid place-items-center bg-[radial-gradient(circle_at_30%_20%,#fffdf8,#efeade)]",
+          "grid place-items-center bg-cream-2",
           className,
         )}
         aria-label={alt}
         role="img"
       >
-        <span className="text-4xl opacity-80">{emoji}</span>
+        <span className="px-3 text-center text-[10.5px] font-medium leading-snug text-ink-soft">
+          {alt}
+        </span>
       </div>
     );
   }

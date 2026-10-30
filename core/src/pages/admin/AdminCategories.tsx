@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Folder, Pencil, Plus, Trash2 } from "lucide-react";
 import { api, errorMessage } from "../../lib/api";
 import { useToast } from "../../lib/toast";
 import { slugify } from "../../lib/format";
@@ -22,7 +22,7 @@ type FormState = {
 const emptyForm: FormState = {
   name: "",
   slug: "",
-  emoji: "🛍️",
+  emoji: "",
   description: "",
   image_url: "",
   sort_order: "0",
@@ -156,8 +156,8 @@ export function AdminCategories() {
                       loading="lazy"
                     />
                   ) : (
-                    <span className="grid size-full place-items-center text-lg">
-                      {category.emoji ?? "🛍️"}
+                    <span className="grid size-full place-items-center text-ink-soft">
+                      <Folder className="size-4" strokeWidth={1.5} />
                     </span>
                   )}
                 </div>
@@ -180,7 +180,7 @@ export function AdminCategories() {
                     type="button"
                     onClick={() => openEdit(category)}
                     aria-label={`Edit ${category.name}`}
-                    className="rounded-lg border border-line p-2 text-ink-soft transition hover:border-forest/30 hover:text-forest"
+                    className="grid size-11 place-items-center rounded-md border border-line text-ink-soft transition hover:border-forest/30 hover:text-forest"
                   >
                     <Pencil className="size-3.5" />
                   </button>
@@ -188,7 +188,7 @@ export function AdminCategories() {
                     type="button"
                     onClick={() => setTarget(category)}
                     aria-label={`Delete ${category.name}`}
-                    className="rounded-lg border border-line p-2 text-ink-soft transition hover:border-clay/30 hover:text-clay"
+                    className="grid size-11 place-items-center rounded-md border border-line text-ink-soft transition hover:border-clay/30 hover:text-clay"
                   >
                     <Trash2 className="size-3.5" />
                   </button>
@@ -238,22 +238,12 @@ export function AdminCategories() {
               className="input font-mono text-[12px]"
             />
           </label>
-          <label className="block">
-            <span className="label">Emoji</span>
-            <input
-              value={form.emoji}
-              onChange={(event) => patch({ emoji: event.target.value })}
-              placeholder="🥬"
-              maxLength={4}
-              className="input"
-            />
-          </label>
           <label className="block sm:col-span-2">
             <span className="label">Short description</span>
             <input
               value={form.description}
               onChange={(event) => patch({ description: event.target.value })}
-              placeholder="Picked fresh this morning"
+              placeholder="For example, Fruits and vegetables"
               className="input"
             />
           </label>

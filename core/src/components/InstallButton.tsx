@@ -41,7 +41,7 @@ export function InstallButton({ className }: { className?: string }) {
         onClick={install}
         aria-label="Install L MART on your device"
         className={cn(
-          "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-cream/12 px-2.5 py-1 text-[10.5px] font-medium text-cream ring-1 ring-inset ring-cream/25 transition hover:bg-cream/25 hover:text-cream",
+          "inline-flex shrink-0 items-center gap-1.5 rounded-md bg-cream/12 px-2.5 py-1 text-[10.5px] font-medium text-cream ring-1 ring-inset ring-cream/25 transition hover:bg-cream/25 hover:text-cream",
           className,
         )}
       >
@@ -53,7 +53,7 @@ export function InstallButton({ className }: { className?: string }) {
         open={open}
         onClose={() => setOpen(false)}
         title="Install L MART on your home screen"
-        description="Open the store like an app — one tap from your home screen, no app store needed."
+        description="Open the store like an app: one tap from your home screen, no app store needed."
       >
         <InstallSteps platform={state.platform} />
         <button
@@ -110,7 +110,7 @@ function InstallSteps({ platform }: { platform: InstallState["platform"] }) {
             {
               icon: MonitorDown,
               title: "Look for the install icon",
-              copy: "A small install symbol on the right side of the address bar — or open the browser menu.",
+              copy: "A small install symbol on the right side of the address bar, or open the browser menu.",
             },
             {
               icon: Download,

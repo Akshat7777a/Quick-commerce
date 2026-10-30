@@ -114,7 +114,7 @@ export function AdminSettings() {
     setTogglingStore(true);
     try {
       await save({ is_open: next });
-      toast(next ? "Store is open for orders" : "Store closed — checkout paused");
+      toast(next ? "Store is open for orders" : "Store closed: checkout paused");
     } catch {
       toast("Couldn't update the store status", "error");
     } finally {
@@ -167,7 +167,7 @@ export function AdminSettings() {
             <div>
               <h2 className="text-xl text-ink">Theme & appearance</h2>
               <p className="text-[11px] text-ink-soft">
-                Switch the store's look for a festival or season — changes apply instantly for
+                Switch the store's look for a festival or season. Changes apply instantly for
                 everyone. Customers can still toggle light/dark themselves in the header.
               </p>
             </div>
@@ -183,7 +183,7 @@ export function AdminSettings() {
                     type="button"
                     onClick={() => patch({ theme_mode: option.value })}
                     className={
-                      "chip h-9 flex-1 justify-center px-4 text-[12px] " +
+                      "chip flex-1 justify-center px-4 text-base " +
                       (form.theme_mode === option.value ? "chip-active" : "")
                     }
                   >
@@ -207,7 +207,7 @@ export function AdminSettings() {
                       type="button"
                       onClick={() => patch({ theme_preset: preset.id })}
                       className={
-                        "flex items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition " +
+                        "flex min-h-11 items-center gap-2 rounded-md border px-2.5 py-2 text-left transition " +
                         (active
                           ? "border-forest bg-forest/[0.06]"
                           : "border-line hover:border-ink/30")
@@ -223,7 +223,7 @@ export function AdminSettings() {
                         ))}
                       </span>
                       <span className="truncate text-[11px] text-ink">
-                        {preset.emoji} {preset.label}
+                        {preset.label}
                       </span>
                     </button>
                   );
@@ -277,7 +277,7 @@ export function AdminSettings() {
                 rows={2}
                 value={form.address}
                 onChange={(event) => patch({ address: event.target.value })}
-                placeholder="L MART, 12 Market Road, Bengaluru 560001"
+                placeholder="Enter the shop's address and PIN code"
                 className="input resize-none"
               />
             </label>
@@ -309,7 +309,7 @@ export function AdminSettings() {
           </label>
           <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-soft">
             Currently serving {parsePincodes(form.serviceable_pincodes).length} PIN code
-            {parsePincodes(form.serviceable_pincodes).length === 1 ? "" : "s"} — add more codes
+            {parsePincodes(form.serviceable_pincodes).length === 1 ? "" : "s"}. Add more codes
             here whenever you expand delivery.
           </p>
         </section>
@@ -322,7 +322,7 @@ export function AdminSettings() {
             <div>
               <h2 className="text-xl text-ink">Delivery time options</h2>
               <p className="text-[11px] text-ink-soft">
-                One option per line — customers pick one at checkout (instant, 1–2 hours, or fixed
+                One option per line: customers pick one at checkout (instant, 1–2 hours, or fixed
                 slots like 10:00 AM – 12:00 PM).
               </p>
             </div>

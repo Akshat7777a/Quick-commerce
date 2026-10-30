@@ -4,15 +4,15 @@
 --  Safe to re-run: every object is replaced in place.
 --
 --  What this fixes:
---    1. profiles   — a signed-in customer could overwrite their own email,
+--    1. profiles: a signed-in customer could overwrite their own email,
 --                    id and created_at (the directory is built from these).
---    2. place_order — duplicate cart lines for the same product double-counted
+--    2. place_order: duplicate cart lines for the same product double-counted
 --                    the subtotal but only decremented stock once.
---    3. place_order — no length caps on name/phone/address/notes, no cap on
+--    3. place_order: no length caps on name/phone/address/notes, no cap on
 --                    distinct cart lines, phone not sanity-checked.
---    4. place_order — the coupon row was read without a lock, so two concurrent
+--    4. place_order: the coupon row was read without a lock, so two concurrent
 --                    orders could both pass the usage_limit check.
---    5. grants     — the order-number sequence and order_items writes were
+--    5. grants: the order-number sequence and order_items writes were
 --                    granted to every signed-in user without needing them.
 -- ============================================================================
 

@@ -60,7 +60,7 @@ export function ProductPage() {
   useEffect(() => {
     if (product) document.title = `${product.name} · L MART ONLINE`;
     return () => {
-      document.title = "L MART ONLINE — Everyday essentials, delivered";
+      document.title = "L MART ONLINE: Everyday essentials, delivered";
     };
   }, [product]);
 
@@ -132,7 +132,6 @@ export function ProductPage() {
             src={product.image_url}
             alt={product.name}
             className="size-full object-cover"
-            emoji="🛒"
           />
           {off > 0 && (
             <span className="absolute left-4 top-4 rounded-full bg-cream/95 px-3 py-1.5 text-[11px] font-semibold text-clay shadow-sm">
@@ -166,8 +165,7 @@ export function ProductPage() {
           </div>
 
           <p className="mt-5 max-w-lg text-[13.5px] leading-relaxed text-ink-soft">
-            {product.description ??
-              "A dependable everyday essential, hand-picked for the L MART shelf."}
+            {product.description?.trim() || `${product.name}, sold as ${product.unit}.`}
           </p>
 
           <div className="mt-5 flex items-center gap-2 text-[11.5px]">
@@ -179,7 +177,7 @@ export function ProductPage() {
             ) : lowStock ? (
               <span className="text-[#8a6415]">Only {product.stock} left today</span>
             ) : (
-              <span className="text-[#1c6b3f]">In stock · packed fresh</span>
+              <span className="text-[#1c6b3f]">In stock</span>
             )}
           </div>
 
@@ -222,7 +220,7 @@ export function ProductPage() {
             {[
               { icon: Banknote, title: "Cash on delivery", copy: "Pay at your door" },
               { icon: Truck, title: settings.delivery_estimate ?? "Same-day", copy: "Local delivery" },
-              { icon: ShieldCheck, title: "Freshness promise", copy: "Checked before packing" },
+              { icon: ShieldCheck, title: "Product details", copy: product.unit },
             ].map((item) => (
               <div key={item.title} className="bg-card px-4 py-3.5">
                 <item.icon className="size-4 text-forest" strokeWidth={1.6} />

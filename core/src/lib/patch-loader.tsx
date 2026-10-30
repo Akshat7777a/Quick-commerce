@@ -109,9 +109,13 @@ export async function runPatchLoader(): Promise<void> {
   }
 
   if (skipped.length > 0) {
-    console.info(`[patches] Loaded ${loaded}, skipped: ${skipped.join("; ")}`);
+    if (import.meta.env.DEV) {
+      console.info(`[patches] Loaded ${loaded}, skipped: ${skipped.join("; ")}`);
+    }
   } else if (loaded > 0) {
-    console.info(`[patches] Loaded ${loaded} patch${loaded === 1 ? "" : "es"}.`);
+    if (import.meta.env.DEV) {
+      console.info(`[patches] Loaded ${loaded} patch${loaded === 1 ? "" : "es"}.`);
+    }
   }
 }
 

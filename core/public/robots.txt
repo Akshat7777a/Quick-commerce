@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+Disallow: /orders
+Disallow: /account
+
+Sitemap: https://lmart.akshatladdha3.workers.dev/sitemap.xml

@@ -7,7 +7,6 @@ import {
   Mail,
   MailCheck,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useDemoMode } from "../lib/demo-mode";
@@ -29,12 +28,7 @@ function AuthShell({
     <div className="container-page py-8 sm:py-14">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-card shadow-soft lg:grid-cols-[1.02fr_1fr]">
         <div className="relative hidden lg:block">
-          <img
-            src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80"
-            alt=""
-            className="absolute inset-0 size-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0b241b] via-[#0b241b]/85 to-[#0b241b]/30" />
+          <div className="absolute inset-0 bg-forest" />
           <div className="relative flex h-full min-h-[34rem] flex-col justify-between p-10 text-cream">
             <Link to="/" className="inline-flex items-baseline gap-2">
               <span className="font-display text-2xl leading-none">
@@ -44,16 +38,14 @@ function AuthShell({
             </Link>
             <div>
               <p className="font-display text-[2.75rem] leading-[1.02]">
-                “The shop down the road,
-                <br />
-                now a tap away.”
+                Groceries and everyday essentials for local delivery.
               </p>
               <div className="mt-6 flex flex-wrap gap-2 text-[10px] text-cream/70">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-cream/20 px-3 py-1.5">
                   <ShieldCheck className="size-3" /> Cash on delivery
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-cream/20 px-3 py-1.5">
-                  <Sparkles className="size-3" /> Stocked daily
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-cream/20 px-3 py-1.5">
+                  Check delivery area at checkout
                 </span>
               </div>
             </div>
@@ -108,7 +100,7 @@ function PasswordField({
         type="button"
         onClick={() => setVisible((current) => !current)}
         aria-label={visible ? "Hide password" : "Show password"}
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-ink-soft transition hover:text-ink"
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-ink-soft transition hover:text-ink"
       >
         {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
       </button>
@@ -129,7 +121,7 @@ function PreviewAccess({ next = "/admin" }: { next?: string }) {
       <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-forest">Preview mode</p>
       <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-soft">
         The database migration hasn&apos;t been applied yet, so the store is running on sample data.
-        Use a preview account to try checkout and the admin panel — nothing leaves this browser.
+        Use a preview account to try checkout and the admin panel. Nothing leaves this browser.
       </p>
       <button
         type="button"
@@ -237,7 +229,7 @@ export function SignupPage() {
     setError("");
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 10) {
-      setError("Please enter a valid phone number — we need it to confirm your order.");
+      setError("Please enter a valid phone number. We need it to confirm your order.");
       return;
     }
     setBusy(true);
@@ -341,7 +333,7 @@ export function SignupPage() {
               className="input"
             />
             <span className="mt-1.5 block text-[10.5px] leading-relaxed text-ink-soft">
-              Required — we call or text this number to confirm orders.
+              Required: we call or text this number to confirm orders.
             </span>
           </label>
         </div>

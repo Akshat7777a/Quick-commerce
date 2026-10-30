@@ -51,7 +51,7 @@ alter table public.orders
 
 -- ---------------------------------------------------------------------------
 --  3. place_order(): enforce the delivery area and the chosen slot.
---     Replaces the hardening version — keeps every hardening rule and adds:
+--     Replaces the hardening version: keeps every hardening rule and adds:
 --       · the address must contain a serviceable 6-digit PIN code
 --       · the slot must be one of the admin's delivery options
 -- ---------------------------------------------------------------------------

@@ -43,7 +43,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
         <button
           type="button"
           onClick={copy}
-          className="inline-flex items-center gap-1.5 rounded-full border border-forest/20 bg-forest/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-forest transition hover:bg-forest hover:text-cream"
+          className="inline-flex items-center gap-1.5 rounded-md border border-forest/20 bg-forest/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-forest transition hover:bg-forest hover:text-cream"
         >
           {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
           {coupon.code}

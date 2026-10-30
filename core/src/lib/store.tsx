@@ -43,7 +43,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const fresh = await api.getSettings();
       if (fresh) setSettings(fresh);
     } catch {
-      /* keep the last known settings — the storefront stays usable */
+      /* keep the last known settings, the storefront stays usable */
     } finally {
       setLoading(false);
     }

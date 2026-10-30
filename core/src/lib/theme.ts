@@ -8,19 +8,18 @@ export type ThemeMode = "light" | "dark" | "system";
 export type ThemePreset = {
   id: string;
   label: string;
-  emoji: string;
   /** [primary, gold, clay] swatches for the admin picker. */
   swatch: [string, string, string];
 };
 
 /** Festival / branding presets the admin can switch between. */
 export const THEME_PRESETS: ThemePreset[] = [
-  { id: "default", label: "Classic green", emoji: "🛒", swatch: ["#103327", "#d8a84b", "#b4552f"] },
-  { id: "diwali", label: "Diwali", emoji: "🪔", swatch: ["#5b2a86", "#f0b429", "#c2185b"] },
-  { id: "holi", label: "Holi", emoji: "🎨", swatch: ["#ad1457", "#ffb300", "#8e24aa"] },
-  { id: "christmas", label: "Christmas", emoji: "🎄", swatch: ["#b3261e", "#ffd54f", "#2e7d32"] },
-  { id: "eid", label: "Eid", emoji: "🌙", swatch: ["#00695c", "#d4af37", "#1b5e20"] },
-  { id: "republic", label: "Republic Day", emoji: "🇮🇳", swatch: ["#ef6c00", "#138808", "#ffd54f"] },
+  { id: "default", label: "Classic green", swatch: ["#103327", "#d8a84b", "#b4552f"] },
+  { id: "diwali", label: "Diwali", swatch: ["#7a3f18", "#d49a18", "#a3453a"] },
+  { id: "holi", label: "Holi", swatch: ["#b4384e", "#ffb300", "#bf552c"] },
+  { id: "christmas", label: "Christmas", swatch: ["#b3261e", "#ffd54f", "#2e7d32"] },
+  { id: "eid", label: "Eid", swatch: ["#00695c", "#d4af37", "#1b5e20"] },
+  { id: "republic", label: "Republic Day", swatch: ["#ef6c00", "#138808", "#ffd54f"] },
 ];
 
 export function readModeOverride(): ThemeMode | null {

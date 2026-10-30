@@ -83,7 +83,7 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
               key={banner.id}
               aria-hidden={!active}
               className={cn(
-                "transition-opacity duration-700",
+                "transition-opacity duration-200",
                 active ? "relative opacity-100" : "pointer-events-none absolute inset-0 opacity-0",
                 tone.wrapper,
               )}
@@ -139,10 +139,10 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
                   aria-current={dot === index}
                   onClick={() => setIndex(dot)}
                   className={cn(
-                    "h-1 rounded-full transition-all duration-300",
+                    "grid size-11 place-items-center rounded-md transition-all duration-200",
                     dot === index
-                      ? cn("w-6", tones[banner.tone]?.dotActive ?? "bg-gold")
-                      : cn("w-1.5", tones[banner.tone]?.dot ?? "bg-cream/30"),
+                      ? cn("after:h-1 after:w-6 after:rounded-full", tones[banner.tone]?.dotActive ?? "bg-gold")
+                      : cn("after:h-1 after:w-1.5 after:rounded-full", tones[banner.tone]?.dot ?? "bg-cream/30"),
                   )}
                 />
               ))}
@@ -151,7 +151,7 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
               type="button"
               onClick={() => go(-1)}
               aria-label="Previous banner"
-              className="grid size-9 place-items-center rounded-full border border-cream/20 bg-ink/55 text-cream backdrop-blur transition hover:bg-ink/75"
+              className="grid size-11 place-items-center rounded-md border border-cream/20 bg-ink/80 text-cream transition hover:bg-ink/90"
             >
               <ArrowLeft className="size-4" />
             </button>
@@ -159,7 +159,7 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
               type="button"
               onClick={() => go(1)}
               aria-label="Next banner"
-              className="grid size-9 place-items-center rounded-full border border-cream/20 bg-ink/55 text-cream backdrop-blur transition hover:bg-ink/75"
+              className="grid size-11 place-items-center rounded-md border border-cream/20 bg-ink/80 text-cream transition hover:bg-ink/90"
             >
               <ArrowRight className="size-4" />
             </button>

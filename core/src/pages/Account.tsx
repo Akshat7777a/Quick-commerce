@@ -95,7 +95,7 @@ export function Account() {
             </span>
           </div>
           <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">
-            We use these to prefill your deliveries — nothing else.
+            We use these to prefill your deliveries, nothing else.
           </p>
 
           <div className="mt-6 grid gap-4">

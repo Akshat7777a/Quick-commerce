@@ -74,7 +74,7 @@ function write(state: DemoState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    /* storage full — keep the in-memory copy */
+    /* storage full, keep the in-memory copy */
   }
 }
 
@@ -268,6 +268,10 @@ export const demo = {
       order_items: items,
     };
 
+    const waPhone = input.phone?.replace(/\D/g, "") || "";
+    const waMessage = `Order *${orderNumber}*\nCustomer: ${input.customerName}\nPhone: ${waPhone}\nAddress: ${input.address}\nDelivery slot: ${input.deliverySlot ?? ""}\nTotal: ₹${order.total}\nItems:\n${items.map((it) => `- ${it.quantity} × ${it.name} (${it.unit}): ₹${it.price * it.quantity}`).join("\n\n")}\nPay cash on delivery.`;
+    const waUrl = waPhone ? `https://wa.me/${waPhone}?text=${encodeURIComponent(waMessage)}` : null;
+
     state.orders.unshift(order);
     items.forEach((item) => {
       const product = state.products.find((p) => p.id === item.product_id);
@@ -283,6 +287,7 @@ export const demo = {
       delivery_fee: order.delivery_fee,
       total: order.total,
       coupon_code: couponCode,
+      waUrl,
     };
   },
 

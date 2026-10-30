@@ -15,6 +15,7 @@ import { Account } from "./pages/Account";
 import { Offers } from "./pages/Offers";
 import { LoginPage, SignupPage } from "./pages/Auth";
 import { NotFound } from "./pages/NotFound";
+import { Maintenance, PrivacyPolicy, TermsOfService } from "./pages/Legal";
 import { AdminLayout } from "./pages/admin/AdminLayout";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminProducts } from "./pages/admin/AdminProducts";
@@ -108,6 +109,9 @@ export function App() {
                   <Route path="/account" element={<Account />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/maintenance" element={<Maintenance />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
 

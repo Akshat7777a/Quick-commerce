@@ -12,13 +12,13 @@ function notify() {
 export const demoMode = {
   status: () => status,
   isEnabled: () => status === "demo",
-  /** The database schema is missing — switch to local preview data. */
+  /** The database schema is missing, switch to local preview data. */
   enable() {
     if (status === "demo") return;
     status = "demo";
     notify();
   },
-  /** A real Supabase request succeeded — never fall back again. */
+  /** A real Supabase request succeeded, never fall back again. */
   markLive() {
     if (status !== "checking") return;
     status = "live";

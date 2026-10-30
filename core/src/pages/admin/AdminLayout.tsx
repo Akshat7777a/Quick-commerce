@@ -87,7 +87,7 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <header className="sticky top-0 z-30 border-b border-line bg-cream/92 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-line bg-cream">
         <div className="container-page flex h-16 items-center gap-3">
           <Link to="/admin" className="flex items-center gap-2.5">
             <span className="grid size-8 place-items-center rounded-lg bg-forest font-display text-lg text-cream">
@@ -120,13 +120,13 @@ export function AdminLayout() {
             </span>
             <Link
               to="/admin/settings"
-              className="hidden items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[11px] text-ink-soft transition hover:border-ink hover:text-ink sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-md border border-line px-3 py-1.5 text-[11px] text-ink-soft transition hover:border-ink hover:text-ink sm:inline-flex"
             >
               <ShieldCheck className="size-3.5" /> Control
             </Link>
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-forest px-3.5 py-2 text-[11px] text-cream transition hover:bg-forest-2"
+              className="inline-flex items-center gap-1.5 rounded-md bg-forest px-3.5 py-2 text-[11px] text-cream transition hover:bg-forest-2"
             >
               View store <ArrowUpRight className="size-3.5" />
             </Link>
@@ -142,7 +142,7 @@ export function AdminLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[10.5px] transition sm:px-3 sm:text-[11px]",
+                    "inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[10.5px] transition sm:px-3 sm:text-[11px]",
                     isActive
                       ? "bg-forest text-cream"
                       : "border border-line text-ink-soft hover:text-ink",

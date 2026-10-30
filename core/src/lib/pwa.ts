@@ -13,7 +13,7 @@ type BeforeInstallPromptEvent = Event & {
 export type InstallPlatform = "ios" | "android" | "desktop";
 
 export type InstallState = {
-  /** The app is already running as an installed app — hide install UI. */
+  /** The app is already running as an installed app, hide install UI. */
   installed: boolean;
   /** Chrome/Android/Edge: the browser is offering its native install prompt. */
   canPrompt: boolean;
@@ -67,14 +67,14 @@ if (typeof window !== "undefined") {
   });
 }
 
-/** Call once at startup — registers /sw.js, required for installability. */
+/** Call once at startup: registers /sw.js, required for installability. */
 export function registerServiceWorker() {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
   if (location.protocol !== "https:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
     return; // service workers need a secure context
   }
   navigator.serviceWorker.register("/sw.js").catch(() => {
-    // Offline support unavailable — the app itself still works.
+    // Offline support unavailable. The app itself still works.
   });
 }
 

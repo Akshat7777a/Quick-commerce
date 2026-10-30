@@ -6,24 +6,12 @@ import { discountPercent, inr } from "../lib/format";
 import { ProductImage, QtyStepper } from "./ui";
 import type { Product } from "../lib/types";
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  "fruits-vegetables": "🥬",
-  "dairy-eggs": "🥛",
-  bakery: "🥖",
-  staples: "🌾",
-  snacks: "🍪",
-  beverages: "☕",
-  "home-care": "🧼",
-  "personal-care": "🧴",
-};
-
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const { add, quantityOf, setQuantity } = useCart();
   const { toast } = useToast();
   const quantity = quantityOf(product.id);
   const off = discountPercent(product.price, product.mrp);
   const soldOut = product.stock <= 0;
-  const emoji = CATEGORY_EMOJI[product.category?.slug ?? ""] ?? "🛒";
 
   return (
     <article className="group flex flex-col">
@@ -32,8 +20,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <ProductImage
             src={product.image_url}
             alt={product.name}
-            emoji={emoji}
-            className={`size-full object-cover transition duration-700 ${
+            className={`size-full object-cover transition duration-200 ${
               priority ? "" : "group-hover:scale-[1.04]"
             }`}
           />
@@ -51,7 +38,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         )}
 
         {soldOut && (
-          <div className="absolute inset-0 grid place-items-center bg-cream/65 backdrop-blur-[1px]">
+          <div className="absolute inset-0 grid place-items-center bg-cream/75">
             <span className="rounded-full bg-ink px-3 py-1.5 text-[9px] uppercase tracking-[0.18em] text-cream">
               Sold out
             </span>
@@ -68,12 +55,12 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                   toast(`${product.name} added to your basket`);
                 }}
                 aria-label={`Add ${product.name} to basket`}
-                className="grid size-10 place-items-center rounded-full bg-forest text-cream shadow-soft transition hover:bg-forest-2 active:scale-95"
+                className="grid size-10 place-items-center rounded-md bg-forest text-cream shadow-soft transition hover:bg-forest-2 active:scale-95"
               >
                 <Plus className="size-4" />
               </button>
             ) : (
-              <div className="rounded-full bg-card/95 p-0.5 shadow-soft backdrop-blur">
+              <div className="rounded-md bg-card p-0.5 shadow-soft">
                 <QtyStepper
                   value={quantity}
                   onChange={(next) => setQuantity(product.id, next)}
@@ -91,13 +78,13 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         </p>
         <Link
           to={`/product/${product.slug}`}
-          className="mt-1 line-clamp-2 text-[13.5px] font-medium leading-snug text-ink decoration-ink/30 underline-offset-2 hover:underline"
+          className="mt-1 line-clamp-2 text-base font-medium leading-snug text-ink decoration-ink/30 underline-offset-2 hover:underline"
         >
           {product.name}
         </Link>
-        <p className="mt-0.5 text-[11px] text-ink-soft">{product.unit}</p>
+        <p className="mt-0.5 text-sm text-ink-soft">{product.unit}</p>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="price text-[14.5px] font-semibold text-ink">{inr(product.price)}</span>
+          <span className="price text-base font-semibold text-ink">{inr(product.price)}</span>
           {product.mrp && product.mrp > product.price && (
             <span className="price text-[11px] text-ink-soft line-through">{inr(product.mrp)}</span>
           )}

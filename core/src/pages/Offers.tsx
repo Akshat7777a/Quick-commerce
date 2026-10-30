@@ -37,7 +37,7 @@ export function Offers() {
           Small savings, honestly given.
         </h1>
         <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
-          Copy a code and add it in your basket. One coupon per order — we&apos;ll always apply the
+          Copy a code and add it in your basket. One coupon per order: we&apos;ll always apply the
           best one you enter.
         </p>
       </div>

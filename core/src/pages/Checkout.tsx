@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Clock3,
   MapPin,
+  MessageCircle,
   PackageCheck,
   ShieldCheck,
   ShoppingBag,
@@ -32,6 +33,13 @@ import type { PlaceOrderResult } from "../lib/types";
 /** Half-filled delivery details survive a reload or a discarded background tab. */
 const DRAFT_KEY = "lmart.checkout.draft.v1";
 type Draft = { name?: string; phone?: string; address?: string; notes?: string; slot?: string };
+
+/** Client-side rate limiting on order submission (see map-based gate below). */
+const ORDER_GATE_KEY = "lmart.order.gate.v1";
+const ORDER_GATE_MS = 45_000;
+
+/** One ordered line shown on the confirmation screen. */
+type OrderedItem = { id: string; name: string; unit: string; price: number; quantity: number };
 
 export function Checkout() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -60,6 +68,7 @@ export function Checkout() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PlaceOrderResult | null>(null);
+  const [orderedItems, setOrderedItems] = useState<OrderedItem[]>([]);
 
   // The draft is saved as the customer types, so a reload, a switch to another
   // tab, or a browser-discarded background tab comes back exactly as left.
@@ -135,6 +144,24 @@ export function Checkout() {
                 <dd className="text-right leading-relaxed text-ink">{chosenSlot}</dd>
               </div>
             </dl>
+
+            {orderedItems.length > 0 && (
+              <ul className="mt-5 divide-y divide-line/70">
+                {orderedItems.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between gap-4 py-2.5 text-[12.5px] first:pt-0"
+                  >
+                    <span className="min-w-0 leading-snug text-ink">
+                      {item.quantity} × {item.name}
+                      <span className="text-ink-soft"> · {item.unit}</span>
+                    </span>
+                    <span className="price shrink-0 font-medium">{inr(item.price * item.quantity)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
               <button
                 type="button"
@@ -151,6 +178,29 @@ export function Checkout() {
                 Keep shopping
               </button>
             </div>
+            {result.waUrl && (
+              <div className="mt-3 text-center">
+                <a
+                  href={result.waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-[11px] text-forest underline underline-offset-2 hover:text-clay"
+                >
+                  <MessageCircle className="size-4" /> Send order details to our WhatsApp
+                </a>
+              </div>
+            )}
+            {settings.phone && (
+              <p className="mt-4 text-center text-[10.5px] leading-relaxed text-ink-soft">
+                Questions about this order? Call the shop:{" "}
+                <a
+                  href={`tel:${settings.phone.replace(/\s/g, "")}`}
+                  className="text-forest underline underline-offset-2"
+                >
+                  {settings.phone}
+                </a>
+              </p>
+            )}
             <p className="mt-4 text-center text-[10.5px] leading-relaxed text-ink-soft">
               {settings.delivery_estimate} · We&apos;ll call {phone} if we need to check anything.
             </p>
@@ -166,7 +216,7 @@ export function Checkout() {
         <EmptyState
           icon={<ShoppingBag className="size-5" />}
           title="Your basket is empty"
-          description="Add a few essentials before checking out — we'll keep them here for you."
+          description="Add a few essentials before checking out. We'll keep them here for you."
           action={
             <Link to="/shop" className="btn btn-primary">
               Browse the shelves
@@ -189,10 +239,20 @@ export function Checkout() {
     if (!pin) return setError("Please add a 6-digit PIN code to your delivery address.");
     if (!pinList.includes(pin)) {
       return setError(
-        `We currently deliver only to PIN ${pinList.join(", ")} — our store is in ${STORE_CITY_LABEL}. Please update the address.`,
+        `We currently deliver only to PIN ${pinList.join(", ")}: our store is in ${STORE_CITY_LABEL}. Please update the address.`,
       );
     }
     if (!chosenSlot) return setError("Please choose a delivery time.");
+
+    // Client-side rate limit: one order per device per 45 seconds. Server-side
+    // enforcement is a separate task (the database function change needs a
+    // signed-off migration).
+    const lastOrderAt = readJSON<number>(ORDER_GATE_KEY) ?? 0;
+    if (lastOrderAt && Date.now() - lastOrderAt < ORDER_GATE_MS) {
+      return setError(
+        "An order was placed from this device moments ago. If it did not go through, please wait a few seconds and try again.",
+      );
+    }
 
     setBusy(true);
     try {
@@ -222,10 +282,33 @@ export function Checkout() {
         },
         user.id,
       );
-      setResult(placed);
+      setOrderedItems(
+        items.map((line) => ({
+          id: line.product.id,
+          name: line.product.name,
+          unit: line.product.unit,
+          price: line.product.price,
+          quantity: line.quantity,
+        })),
+      );
+      // A pre-filled WhatsApp message to the store gives the owner a second
+      // heads-up beside the admin dashboard.
+      const storeDigits = (settings.phone ?? "").replace(/\D/g, "");
+      const waMessage = [
+        `New order ${placed.order_number}`,
+        `Customer: ${name} (${phone})`,
+        `Address: ${address}`,
+        `Delivery slot: ${chosenSlot}`,
+        `Total: ${inr(placed.total)} (cash on delivery)`,
+      ].join("\n");
+      const waUrl = storeDigits
+        ? `https://wa.me/${storeDigits}?text=${encodeURIComponent(waMessage)}`
+        : `https://api.whatsapp.com/send?text=${encodeURIComponent(waMessage)}`;
+      setResult({ ...placed, waUrl });
+      writeJSON(ORDER_GATE_KEY, Date.now());
       clear();
       removeKey(DRAFT_KEY); // placed: the half-filled form no longer applies
-      toast("Order placed — cash on delivery");
+      toast("Order placed: cash on delivery");
       window.scrollTo({ top: 0, behavior: "smooth" });
       await runPatchHooks("after-checkout", { order: placed });
     } catch (caught) {
@@ -253,7 +336,7 @@ export function Checkout() {
         <p className="eyebrow">Checkout</p>
         <h1 className="text-4xl leading-tight text-ink sm:text-5xl">Almost at your door.</h1>
         <p className="max-w-lg text-[13px] leading-relaxed text-ink-soft">
-          Tell us where to bring the basket. You pay in cash when it arrives — no card details needed.
+          Tell us where to bring the basket. You pay in cash when it arrives, no card details needed.
         </p>
       </div>
 
@@ -322,7 +405,7 @@ export function Checkout() {
                   }
                   return (
                     <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-soft">
-                      {pin ? `PIN ${pin} — ` : ""}We deliver to PIN {pinList.join(", ")} · {STORE_CITY_LABEL}.
+                      {pin ? `PIN ${pin}: ` : ""}We deliver to PIN {pinList.join(", ")} · {STORE_CITY_LABEL}.
                     </p>
                   );
                 })()}
@@ -345,7 +428,7 @@ export function Checkout() {
               <h2 className="text-xl text-ink">Delivery time</h2>
             </div>
             <p className="mt-1 text-[11.5px] leading-relaxed text-ink-soft">
-              Choose when the basket should arrive — we'll work to that slot.
+              Choose when the basket should arrive, we'll work to that slot.
             </p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {slotOptions.map((option) => {
@@ -523,7 +606,14 @@ export function Checkout() {
                 {busy ? <Spinner /> : <ArrowRight className="size-4" />}
               </button>
               <p className="mt-2.5 text-center text-[10px] leading-relaxed text-ink-soft">
-                By placing this order you agree to pay {inr(total)} on delivery.
+                By placing this order you agree to pay {inr(total)} on delivery and to our{" "}
+                <Link to="/terms" className="underline underline-offset-2 hover:text-ink">
+                  Terms and Conditions
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-ink">
+                  Privacy Policy
+                </Link>.
               </p>
             </div>
           </div>

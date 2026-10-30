@@ -108,11 +108,11 @@ export function Shop() {
         </h1>
         <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-ink-soft">
           {activeCategory?.description ??
-            "Fresh produce, pantry staples and everyday rituals — stocked daily at your local L MART."}
+            "Browse groceries and everyday essentials from L MART."}
         </p>
       </div>
 
-      <div className="-mx-5 mt-7 border-y border-line bg-cream/95 px-5 py-3 sm:mx-0 sm:rounded-2xl sm:border sm:px-4 md:sticky md:top-[9.75rem] md:z-20 md:backdrop-blur-xl">
+      <div className="-mx-5 mt-7 border-y border-line bg-cream px-5 py-3 sm:mx-0 sm:rounded-2xl sm:border sm:px-4 md:sticky md:top-[9.75rem] md:z-20">
         <div className="flex items-center gap-2">
           <form
             onSubmit={(event) => {
@@ -128,14 +128,14 @@ export function Shop() {
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Search products…"
               aria-label="Search products"
-              className="input h-10 border-transparent bg-cream-2/70 pl-10 pr-9 focus:border-forest/40 focus:bg-card"
+              className="input h-11 border-transparent bg-cream-2/70 pl-10 pr-9 focus:border-forest/40 focus:bg-card"
             />
             {searchInput && (
               <button
                 type="button"
                 onClick={() => setSearchInput("")}
                 aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-soft transition hover:text-ink"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-ink-soft transition hover:text-ink"
               >
                 <X className="size-3.5" />
               </button>
@@ -148,7 +148,7 @@ export function Shop() {
               value={sort in sortLabels ? sort : "featured"}
               onChange={(event) => setParamsSafe({ sort: event.target.value })}
               aria-label="Sort products"
-              className="input h-10 w-[9.5rem] appearance-none border-transparent bg-cream-2/70 pl-8 pr-3 text-[11.5px] focus:bg-card sm:w-auto sm:pr-6"
+              className="input h-11 w-[9.5rem] appearance-none border-transparent bg-cream-2/70 pl-8 pr-3 text-base focus:bg-card sm:w-auto sm:pr-6"
             >
               {(Object.keys(sortLabels) as Sort[]).map((key) => (
                 <option key={key} value={key}>
@@ -163,7 +163,7 @@ export function Shop() {
           <button
             type="button"
             onClick={() => setParamsSafe({ category: null })}
-            className={cn("chip h-8 px-3 text-[11.5px]", !categorySlug && "chip-active")}
+            className={cn("chip px-3 text-sm", !categorySlug && "chip-active")}
           >
             All
           </button>
@@ -173,11 +173,10 @@ export function Shop() {
               type="button"
               onClick={() => setParamsSafe({ category: category.slug })}
               className={cn(
-                "chip h-8 px-3 text-[11.5px]",
+                "chip px-3 text-sm",
                 categorySlug === category.slug && "chip-active",
               )}
             >
-              <span aria-hidden="true">{category.emoji}</span>
               {category.name}
             </button>
           ))}
@@ -210,7 +209,7 @@ export function Shop() {
             description={
               q
                 ? `We couldn't find anything for “${q}”. Try a shorter word or browse another aisle.`
-                : "This aisle is empty for now. Try another category — new stock lands every morning."
+                : "This aisle is empty for now. Try another category."
             }
             action={
               <button

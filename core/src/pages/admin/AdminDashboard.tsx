@@ -57,7 +57,7 @@ export function AdminDashboard() {
     setSavingStore(true);
     try {
       await save({ is_open: next });
-      toast(next ? "Store is now open for orders" : "Store closed — checkout is paused");
+      toast(next ? "Store is now open for orders" : "Store closed: checkout is paused");
     } catch {
       toast("Couldn't update the store status", "error");
     } finally {
@@ -110,7 +110,7 @@ export function AdminDashboard() {
               <stat.icon className="size-4 text-forest/60" strokeWidth={1.6} />
             </div>
             <p className="price mt-3 font-display text-[2rem] leading-none text-ink">
-              {loading ? "—" : stat.value}
+              {loading ? "…" : stat.value}
             </p>
             <p className="mt-2 text-[10.5px] leading-relaxed text-ink-soft">{stat.hint}</p>
           </div>
@@ -149,7 +149,7 @@ export function AdminDashboard() {
           <div className="mt-4 grid grid-cols-2 gap-3 text-[11px]">
             <div className="rounded-xl bg-cream/70 px-3.5 py-3">
               <p className="text-ink-soft">Announcement</p>
-              <p className="mt-1 line-clamp-2 text-ink">{settings.announcement ?? "—"}</p>
+              <p className="mt-1 line-clamp-2 text-ink">{settings.announcement ?? "Not set"}</p>
             </div>
             <div className="rounded-xl bg-cream/70 px-3.5 py-3">
               <p className="text-ink-soft">Free delivery above</p>

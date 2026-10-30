@@ -1,7 +1,7 @@
 import { inr } from "./format";
 import type { Order, StoreSettings } from "./types";
 
-/** The store's home area — Nimbahera, Rajasthan. */
+/** The store's home area: Nimbahera, Rajasthan. */
 export const STORE_AREA_LABEL = "312601 · Nimbahera, Rajasthan";
 export const STORE_CITY_LABEL = "Nimbahera, Rajasthan";
 export const DEFAULT_SERVICEABLE_PINCODES = "312601";
@@ -53,7 +53,7 @@ export function deliveryOptions(settings: StoreSettings): string[] {
 
 /**
  * Plain-text block the admin copies and hands to the delivery person:
- * who, where, when, what to collect — everything for a COD drop-off.
+ * who, where, when, what to collect, everything for a COD drop-off.
  */
 export function deliveryHandoffText(order: Order): string {
   const lines: string[] = [
@@ -65,7 +65,7 @@ export function deliveryHandoffText(order: Order): string {
   if (order.delivery_slot) lines.push(`Deliver by: ${order.delivery_slot}`);
   lines.push("", "Items:");
   for (const item of order.order_items ?? []) {
-    lines.push(`• ${item.quantity} × ${item.name} (${item.unit}) — ${inr(item.price * item.quantity)}`);
+    lines.push(`• ${item.quantity} × ${item.name} (${item.unit}): ${inr(item.price * item.quantity)}`);
   }
   lines.push("", `Payment: Cash on delivery`);
   lines.push(`Collect ${inr(order.total)} from the customer`);

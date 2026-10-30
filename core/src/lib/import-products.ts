@@ -30,7 +30,7 @@ export type ProductImportRow = {
   row: number; // 1-based data row (header is not counted)
   action: "create" | "update";
   errors: string[];
-  /** Original category cell — resolved to a category_id by the caller. */
+  /** Original category cell, resolved to a category_id by the caller. */
   category_ref: string | null;
   payload: ProductImportPayload;
 };
@@ -166,7 +166,7 @@ export function parseProductImport(
         category_ref = rawCategory;
         missingCategories.add(rawCategory);
       } else {
-        errors.push(`unknown category "${rawCategory}" — create it first or enable auto-create`);
+        errors.push(`unknown category "${rawCategory}". Create it first or enable auto-create`);
       }
     }
 

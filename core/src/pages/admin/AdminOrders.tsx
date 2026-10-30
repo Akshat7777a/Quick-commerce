@@ -64,10 +64,10 @@ export function AdminOrders() {
     try {
       await navigator.clipboard.writeText(handoffText);
       setCopied(true);
-      toast("Delivery info copied — paste it to your delivery person");
+      toast("Delivery info copied: paste it to your delivery person");
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast("Couldn't access the clipboard — select the text and copy it", "error");
+      toast("Couldn't access the clipboard. Select the text and copy it", "error");
     }
   };
 
@@ -283,7 +283,7 @@ export function AdminOrders() {
             </dl>
 
             <div>
-              <p className="label">Delivery handoff — for your delivery person</p>
+              <p className="label">Delivery handoff: for your delivery person</p>
               <div className="rounded-xl border border-forest/25 bg-forest/[0.04] p-3.5">
                 <pre className="max-h-52 overflow-y-auto whitespace-pre-wrap font-mono text-[10.5px] leading-relaxed text-ink">
                   {handoffText}
@@ -302,7 +302,7 @@ export function AdminOrders() {
                   </a>
                 </div>
                 <p className="mt-2 text-[10px] leading-relaxed text-ink-soft">
-                  Everything in one block: who, where, when, what to collect in cash — copy it
+                  Everything in one block: who, where, when, what to collect in cash: copy it
                   straight into your delivery person's chat.
                 </p>
               </div>

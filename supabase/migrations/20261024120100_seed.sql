@@ -52,7 +52,7 @@ values
   ('Sweet Carrots', 'sweet-carrots-500g', 'Sweet, snappy carrots for salads, soups and quick pickles.', 36, 44, '500 g', 55, false, true,
    'https://images.unsplash.com/photo-1447175008436-054170c2e979?auto=format&fit=crop&w=900&q=80',
    (select id from public.categories where slug = 'fruits-vegetables')),
-  ('Seasonal Fruit Box', 'seasonal-fruit-box-1kg', 'A rotating mix of whatever is ripest this week — always worth opening.', 349, 420, '1 kg', 25, true, true,
+  ('Seasonal Fruit Box', 'seasonal-fruit-box-1kg', 'A rotating mix of whatever is ripest this week, always worth opening.', 349, 420, '1 kg', 25, true, true,
    'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=900&q=80',
    (select id from public.categories where slug = 'fruits-vegetables')),
 
@@ -163,7 +163,7 @@ on conflict (slug) do nothing;
 
 insert into public.banners (eyebrow, title, subtitle, image_url, cta_label, cta_link, tone, is_active, sort_order)
 select * from (values
-  ('This week', 'The everyday edit', 'Fresh produce, pantry staples and small luxuries — chosen with care, delivered today.',
+  ('This week', 'The everyday edit', 'Fresh produce, pantry staples and small luxuries, chosen with care, delivered today.',
    'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80',
    'Shop the edit', '/shop', 'forest', true, 1),
   ('Cash on delivery', 'Order now. Pay at the door.', 'No cards. No wallets. Just honest shopping from your neighbourhood store.',

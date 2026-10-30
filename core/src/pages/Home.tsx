@@ -5,8 +5,7 @@ import {
   Banknote,
   Clock3,
   MapPin,
-  ShieldCheck,
-  Sparkles,
+  ShoppingBasket,
   Truck,
 } from "lucide-react";
 import { api } from "../lib/api";
@@ -57,8 +56,8 @@ const steps = [
   },
   {
     number: "02",
-    title: "Order in a minute",
-    copy: "Add your address and confirm. No card, no wallet, no fuss.",
+    title: "Confirm your order",
+    copy: "Add your delivery address and choose a delivery time.",
   },
   {
     number: "03",
@@ -113,17 +112,17 @@ export function Home() {
         <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4">
           {[
             { icon: Banknote, title: "Cash on delivery", copy: "Pay when it arrives" },
-            { icon: Truck, title: `Free over ${inr(settings.free_delivery_above)}`, copy: "On every order" },
-            { icon: Clock3, title: "Same-day delivery", copy: settings.delivery_estimate ?? "9 AM – 9 PM" },
-            { icon: ShieldCheck, title: "Quality checked", copy: "Freshness guaranteed" },
+            { icon: Truck, title: `Free over ${inr(settings.free_delivery_above)}`, copy: "Above the order threshold" },
+            { icon: Clock3, title: "Delivery times", copy: "Choose a slot at checkout" },
+            { icon: MapPin, title: "Delivery area", copy: "Check your PIN at checkout" },
           ].map((item) => (
             <div key={item.title} className="flex items-center gap-3 bg-cream px-4 py-4 sm:px-6">
               <item.icon className="size-4 shrink-0 text-forest" strokeWidth={1.6} />
               <div className="min-w-0">
-                <p className="text-[11px] font-medium leading-snug text-ink sm:text-[12px]">
+                <p className="text-[14px] font-medium leading-snug text-ink sm:text-[12px]">
                   {item.title}
                 </p>
-                <p className="text-[10px] leading-snug text-ink-soft sm:text-[10.5px]">{item.copy}</p>
+                <p className="text-[14px] leading-snug text-ink-soft sm:text-[10.5px]">{item.copy}</p>
               </div>
             </div>
           ))}
@@ -154,16 +153,16 @@ export function Home() {
                       src={category.image_url}
                       alt={category.name}
                       loading="lazy"
-                      className="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
+                      className="absolute inset-0 size-full object-cover transition duration-200 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 grid place-items-center text-3xl">
-                      {category.emoji ?? "🛍️"}
+                    <div className="absolute inset-0 grid place-items-center bg-cream-2 text-ink-soft">
+                      <ShoppingBasket className="size-6" strokeWidth={1.4} />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-2.5">
-                    <p className="text-[11px] font-medium leading-tight text-cream">{category.name}</p>
+                    <p className="text-[14px] font-medium leading-tight text-cream">{category.name}</p>
                   </div>
                 </Link>
               ))}
@@ -173,10 +172,10 @@ export function Home() {
       {/* Featured */}
       <section className="container-page mt-14 sm:mt-20">
         <SectionHead
-          eyebrow="Chosen today"
-          title="Picks from the shelves"
+          eyebrow="Featured products"
+          title="Featured in the shop"
           action="/shop?sort=featured"
-          actionLabel="See all picks"
+          actionLabel="See all featured products"
         />
         {loading ? (
           <ProductGridSkeleton count={4} />
@@ -196,12 +195,12 @@ export function Home() {
             <div className="rounded-[1.5rem] bg-cream-2/70 px-5 py-10 sm:rounded-[2rem] sm:px-10 sm:py-12">
               <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <p className="eyebrow">The offers counter</p>
+                  <p className="eyebrow">Store offers</p>
                   <h2 className="mt-2 text-3xl leading-tight text-ink sm:text-[2.5rem]">
                     A little less on the bill
                   </h2>
                   <p className="mt-2 max-w-md text-[13px] leading-relaxed text-ink-soft">
-                    Apply a code in your basket. One offer per order, no fine print worth reading.
+                    Enter a coupon at checkout when your order meets its terms.
                   </p>
                 </div>
                 <Link
@@ -225,20 +224,20 @@ export function Home() {
       <section className="container-page mt-16 sm:mt-24">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <div>
-            <p className="eyebrow">Simple by design</p>
+            <p className="eyebrow">How to order</p>
             <h2 className="mt-2 text-balance text-4xl leading-[1.02] text-ink sm:text-5xl">
-              Your neighbourhood store, now open on your screen.
+              Groceries and everyday essentials.
             </h2>
             <p className="mt-5 max-w-md text-[13.5px] leading-relaxed text-ink-soft">
-              No delivery tracking, no dark stores, no twelve-step checkout. Just the shop you already
-              trust — with a basket that fills itself and a bill you settle at the door.
+              Browse the products, add your delivery address, and choose a delivery time. Cash on
+              delivery is available.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-[11.5px] text-ink-soft">
               <span className="inline-flex items-center gap-2">
-                <MapPin className="size-3.5 text-forest" /> Local & independent
+                <MapPin className="size-3.5 text-forest" /> Delivery area shown at checkout
               </span>
               <span className="inline-flex items-center gap-2">
-                <Sparkles className="size-3.5 text-gold" /> Stocked daily
+                <Clock3 className="size-3.5 text-forest" /> Delivery times shown at checkout
               </span>
             </div>
             <Link to="/shop" className="btn btn-secondary mt-8">

@@ -76,7 +76,7 @@ export function AdminCustomers() {
       <AdminPageHeader
         eyebrow="People"
         title="Customers"
-        description="Your customer database — contact details, order history and lifetime value, all in one place."
+        description="Your customer database: contact details, order history and lifetime value, all in one place."
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
@@ -215,7 +215,7 @@ export function AdminCustomers() {
               </div>
             ) : history.length === 0 ? (
               <p className="rounded-xl border border-dashed border-line px-4 py-8 text-center text-[12px] text-ink-soft">
-                No orders yet — this account hasn't checked out.
+                No orders yet. This account hasn't checked out.
               </p>
             ) : (
               <div className="space-y-2">

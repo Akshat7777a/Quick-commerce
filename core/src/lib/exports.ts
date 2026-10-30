@@ -4,7 +4,7 @@ import type { Order } from "./types";
 /**
  * Every dataset the admin panel can export as CSV.
  * Column values stay spreadsheet-friendly: raw numbers (no ₹ or separators),
- * `true`/`false` for booleans, ISO dates, empty string for null — so files
+ * `true`/`false` for booleans, ISO dates, empty string for null, so files
  * round-trip back through the product importer and open cleanly in Excel.
  */
 
@@ -41,7 +41,7 @@ export const EXPORT_DATASETS: ExportDataset[] = [
   {
     id: "products",
     label: "Products",
-    description: "Full catalogue — the same columns the importer accepts, so this file round-trips.",
+    description: "Full catalogue: the same columns the importer accepts, so this file round-trips.",
     file: "lmart-products",
     columns: productColumns,
     load: async () => {
@@ -64,7 +64,7 @@ export const EXPORT_DATASETS: ExportDataset[] = [
   {
     id: "sales",
     label: "Sales (line items)",
-    description: "One row per item sold, with the order it belongs to — ready for pivot tables.",
+    description: "One row per item sold, with the order it belongs to, ready for pivot tables.",
     file: "lmart-sales",
     columns: [
       { key: "order_number", header: "order_number" },
@@ -99,7 +99,7 @@ export const EXPORT_DATASETS: ExportDataset[] = [
   {
     id: "orders",
     label: "Orders",
-    description: "Every order with totals, coupon and delivery details — the sales register.",
+    description: "Every order with totals, coupon and delivery details: the sales register.",
     file: "lmart-orders",
     columns: [
       { key: "order_number", header: "order_number" },
@@ -173,7 +173,7 @@ export const EXPORT_DATASETS: ExportDataset[] = [
   {
     id: "categories",
     label: "Categories",
-    description: "Category list — can also be edited in a sheet and re-imported later.",
+    description: "Category list: can also be edited in a sheet and re-imported later.",
     file: "lmart-categories",
     columns: [
       { key: "name", header: "name" },

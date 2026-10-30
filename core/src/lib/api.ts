@@ -330,7 +330,7 @@ export const api = {
 
   /** Bulk product import from CSV: inserts new rows, upserts existing ones. */
   adminImportProducts(create: ProductImportPayload[], update: ProductImportPayload[]): Promise<void> {
-    // New rows must not carry an `id` key at all — PostgREST derives its
+    // New rows must not carry an `id` key at all, PostgREST derives its
     // `columns` list from Object.keys, and an id: undefined entry would make
     // the column list disagree with the serialized JSON body (HTTP 400).
     const stripId = (row: ProductImportPayload): ProductImportPayload => {

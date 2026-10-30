@@ -119,7 +119,7 @@ export function Orders() {
           <p className="eyebrow">Your history</p>
           <h1 className="mt-2 text-4xl leading-tight text-ink sm:text-5xl">Order history</h1>
           <p className="mt-2 max-w-md text-[13px] leading-relaxed text-ink-soft">
-            Every basket you&apos;ve placed with L MART — and a one-tap way to order it again.
+            Every basket you&apos;ve placed with L MART, and a one-tap way to order it again.
           </p>
         </div>
         {orders.length > 0 && (

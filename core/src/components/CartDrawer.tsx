@@ -72,7 +72,7 @@ export function CartDrawer() {
   return createPortal(
     <div className="fixed inset-0 z-[70]">
       <div
-        className="absolute inset-0 bg-ink/40 backdrop-blur-[2px] animate-fade-in"
+        className="absolute inset-0 bg-ink/40 animate-fade-in"
         onClick={closeCart}
         aria-hidden="true"
       />
@@ -93,7 +93,7 @@ export function CartDrawer() {
             type="button"
             onClick={closeCart}
             aria-label="Close basket"
-            className="rounded-full border border-line p-2 text-ink-soft transition hover:border-ink hover:text-ink"
+            className="rounded-md border border-line p-2 text-ink-soft transition hover:border-ink hover:text-ink"
           >
             <X className="size-4" />
           </button>
@@ -106,7 +106,7 @@ export function CartDrawer() {
             </div>
             <h3 className="mt-5 text-2xl">Your basket is empty</h3>
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-soft">
-              Start with something fresh — the shelves are stocked for today.
+              Start with something fresh: the shelves are stocked for today.
             </p>
             <button type="button" onClick={closeCart} className="btn btn-primary mt-6">
               Browse the store
@@ -124,7 +124,7 @@ export function CartDrawer() {
                   </p>
                   <div className="mt-2 h-1 overflow-hidden rounded-full bg-cream-2">
                     <div
-                      className="h-full rounded-full bg-forest transition-all duration-500"
+                      className="h-full rounded-full bg-forest transition-all duration-200"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -151,7 +151,7 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => remove(product.id)}
                           aria-label={`Remove ${product.name}`}
-                          className="rounded-full p-1 text-ink-soft transition hover:bg-clay/10 hover:text-clay"
+                          className="rounded-md p-1 text-ink-soft transition hover:bg-clay/10 hover:text-clay"
                         >
                           <Trash2 className="size-3.5" />
                         </button>
@@ -239,7 +239,7 @@ export function CartDrawer() {
 
               {!settings.is_open && (
                 <p className="mt-3 rounded-lg bg-clay/10 px-3 py-2 text-[11px] leading-relaxed text-clay">
-                  The store is closed right now. You can keep browsing — checkout reopens with the store.
+                  The store is closed right now. You can keep browsing: checkout reopens with the store.
                 </p>
               )}
 

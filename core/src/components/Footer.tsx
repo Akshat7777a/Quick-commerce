@@ -19,7 +19,7 @@ export function Footer() {
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-cream/65">
               {settings.tagline ??
-                "Everyday essentials from your neighbourhood store — ordered online, paid in cash at your door."}
+                "Everyday essentials from your neighbourhood store, ordered online, paid in cash at your door."}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3 text-[11px] text-cream/70">
@@ -47,7 +47,7 @@ export function Footer() {
             <ul className="mt-4 space-y-3 text-sm text-cream/75">
               <li className="flex gap-2.5">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-cream/40" />
-                <span>{settings.address ?? "L MART, 12 Market Road"}</span>
+                <span>{settings.address ?? "Add the store address in admin"}</span>
               </li>
               <li className="flex gap-2.5">
                 <Phone className="mt-0.5 size-4 shrink-0 text-cream/40" />
@@ -70,7 +70,9 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-3 border-t border-cream/10 pt-6 text-[11px] text-cream/45 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} L MART ONLINE. Made for the neighbourhood.</p>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-5">
+            <Link to="/privacy" className="transition hover:text-cream/80">Privacy Policy</Link>
+            <Link to="/terms" className="transition hover:text-cream/80">Terms and Conditions</Link>
             <Link to="/admin" className="transition hover:text-cream/80">Admin panel</Link>
             <span>Secure checkout · Pay at your door</span>
           </div>

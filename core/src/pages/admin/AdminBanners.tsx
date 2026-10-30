@@ -187,7 +187,7 @@ export function AdminBanners() {
                     type="button"
                     onClick={() => openEdit(banner)}
                     aria-label="Edit banner"
-                    className="rounded-lg border border-line p-2 text-ink-soft transition hover:border-forest/30 hover:text-forest"
+                    className="grid size-11 place-items-center rounded-md border border-line text-ink-soft transition hover:border-forest/30 hover:text-forest"
                   >
                     <Pencil className="size-3.5" />
                   </button>
@@ -195,7 +195,7 @@ export function AdminBanners() {
                     type="button"
                     onClick={() => setTarget(banner)}
                     aria-label="Delete banner"
-                    className="rounded-lg border border-line p-2 text-ink-soft transition hover:border-clay/30 hover:text-clay"
+                    className="grid size-11 place-items-center rounded-md border border-line text-ink-soft transition hover:border-clay/30 hover:text-clay"
                   >
                     <Trash2 className="size-3.5" />
                   </button>
@@ -229,7 +229,7 @@ export function AdminBanners() {
             <input
               value={form.title}
               onChange={(event) => patch({ title: event.target.value })}
-              placeholder="The everyday edit"
+              placeholder="Groceries and everyday essentials"
               className="input"
             />
           </label>
@@ -261,7 +261,7 @@ export function AdminBanners() {
               rows={2}
               value={form.subtitle}
               onChange={(event) => patch({ subtitle: event.target.value })}
-              placeholder="Fresh produce, pantry staples and small luxuries."
+              placeholder="Say what the store sells or explain an offer."
               className="input resize-none"
             />
           </label>

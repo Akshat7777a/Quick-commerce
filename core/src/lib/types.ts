@@ -70,7 +70,7 @@ export type StoreSettings = {
   free_delivery_above: number;
   min_order: number;
   delivery_estimate: string | null;
-  /** "light" | "dark" | "system" — store-wide default (visitors may toggle locally). */
+  /** "light" | "dark" | "system", store-wide default (visitors may toggle locally). */
   theme_mode: "light" | "dark" | "system" | null;
   /** Festival/branding preset id from THEME_PRESETS ("default" = classic green). */
   theme_preset: string | null;
@@ -165,4 +165,5 @@ export type PlaceOrderResult = {
   delivery_fee: number;
   total: number;
   coupon_code: string | null;
+  waUrl: string | null;
 };
