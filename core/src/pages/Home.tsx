@@ -124,7 +124,8 @@ export function Home() {
   const shelvesEmpty = !loading && products.length === 0;
 
   return (
-    <div className="pb-6">
+    <div className="min-h-screen pb-6">
+      <h1 className="sr-only">L MART ONLINE</h1>
       <section className="container-page pt-3">
         {categories.length > 0 ? (
           <CategoryRail categories={categories} />

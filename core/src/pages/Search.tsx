@@ -118,6 +118,7 @@ export function SearchPage() {
 
   return (
     <div className="min-h-screen bg-cream pb-24">
+      <h1 className="sr-only">Search products</h1>
       <div className="sticky top-0 z-20 border-b border-line bg-cream">
         <div className="container-page flex items-center gap-2 py-2">
           <Link

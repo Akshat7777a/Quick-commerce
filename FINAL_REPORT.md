@@ -32,10 +32,10 @@ default simulated Slow 4G and 4x CPU throttling. Reports are in `.internal/lh-*.
 
 | Page | Performance | Accessibility | Best practices | SEO | LCP | CLS |
 | --- | --- | --- | --- | --- | --- | --- |
-| Home | 84 | 100 | 100 | 100 | 4.6s | 0.001 |
+| Home | 87 to 90 | 100 | 100 | 100 | 3.7s to 4.1s | 0.001 to 0.002 |
 | Shop | 87 | 100 | 100 | 100 | 4.1s | 0 |
 | Product | 88 | 100 | 100 | 100 | 4.0s | 0.001 |
-| Search | 78 | 100 | 100 | 100 | 5.8s | 0.001 |
+| Search | 80 | 100 | 100 | 100 | 5.4s | 0.001 |
 
 Home before the polish pass: performance 77, accessibility 89, LCP 5.0s, CLS 0.133.
 
@@ -43,8 +43,8 @@ Targets from the brief:
 
 | Target | Result | Status |
 | --- | --- | --- |
-| Lighthouse mobile 90+ | 84 to 88 on all four pages | Not met |
-| LCP at most 2.5s | 4.0s to 5.8s | Not met |
+| Lighthouse mobile 90+ | 80 to 90 across runs | Not met |
+| LCP at most 2.5s | 3.7s to 5.4s | Not met |
 | CLS at most 0.05 | 0 to 0.001 | Met |
 | Accessibility | 100 on all four pages | Met |
 | Best practices and SEO | 100 on all four pages | Met |
@@ -73,8 +73,20 @@ those can be done from the front end alone.
 - Bytes and discovery: preconnect hints for the image CDN and Supabase, banner images
   rewritten to 1200px (first) and 800px (others) at quality 70, category images reduced from
   900px to 160px, and the hero photo is no longer downloaded on phones.
+- Headings: Home and Search gained the missing `h1` (visually hidden), so every page now
+  has one top-level heading before its sections.
+- Footer shift: on slow runs the footer started inside the viewport while shelves were
+  still loading, then moved 4,600px down. Home now reserves one screen of height, which
+  removed that shift; two consecutive runs measured CLS 0.001 and 0.002.
 - A metric-matched fallback font was tried and reverted: it raised CLS to 0.618, so the
   plain Inter stack with system fallbacks ships instead.
+
+### Additional checks
+
+- Width matrix at 360, 768 and 1280px on eight routes (home, shop, product, search,
+  categories, account, refunds and the 404 page): no horizontal overflow anywhere.
+- Tab return by reload: with one item in the cart, reloading the product page kept the
+  route and the cart badge (1 item in `lmart.cart.v1`).
 
 ## Needs owner input
 
@@ -93,11 +105,8 @@ These remain visible placeholders or gaps, not invented values:
 - Real checkout submission. The store is closed (`is_open` false), so the submit button is
   correctly disabled. Placing an order would create production data and needs owner
   approval with the store open.
-- Width matrix at 360, 390, 768 and 1280px on the final build. Earlier phases were checked
-  at 390px with no horizontal overflow; the final polish changed only image sources,
-  spacing of footer links and a hidden heading.
-- Tab return after several minutes idle. The app has no auto reload and keeps cart, forms
-  and route in memory and storage, but a five-minute background test was not run.
+- Idle behaviour beyond a reload: cart and route survive a reload, but a five-minute
+  background tab was not exercised.
 - Safari on iOS and Samsung Internet. No devices were available.
 - Real payment, coupon and delivery-slot edge cases beyond the disabled-store path.
 
