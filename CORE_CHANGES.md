@@ -74,6 +74,34 @@ LCP element is the data-gated product heading); no improvement is claimed
 there. Home LCP remains dominated by client-side boot time plus the Unsplash
 transfer; remaining levers need owner decisions (image sizes are owner data).
 
+## Phase C audit (no code change)
+
+The service worker (`core/public/sw.js`, byte-identical modulo line endings to
+the deployed `/sw.js`, 2,501 B; registration wired in `main.tsx` with a
+secure-context guard) was audited end to end. Verdict: no genuine bug; both
+candidate concerns are intentional tradeoffs that are correct for this app as
+built.
+
+- **skipWaiting + clients.claim**: a redeployed worker takes control of open
+  tabs immediately. Safe here because navigations are network-first (no stale
+  page), assets are immutable and hashed, and nothing couples worker session
+  state to page state. The rare edge is an old tab whose first-ever admin lazy
+  chunk request lands after a redeploy; forcing a reload recovers. Immediate
+  control is also what lets users pick up the offline fallback quickly, so
+  fixing the edge by delaying activation would cost more than it buys.
+- **Old hashed assets retained in cache**: `activate` only deletes caches with
+  a different name and the name is fixed (`lmart-v1`), so superseded assets
+  accumulate (~1-2 MB per deploy) until the browser's own CacheStorage
+  eviction kicks in. Retention also lets an already-open tab keep working
+  across a redeploy, which pruning would break, so no pruning was added.
+- **Privacy check**: only same-origin GET requests are intercepted; Supabase
+  API traffic, images and cross-origin anything pass untouched, so no user
+  data or auth material ever enters the cache.
+- **Verified live and offline** (real Chrome, 360x800): worker registers and
+  activates on scope `/`; offline home navigation serves the cached copy with
+  HTTP 200; an offline deep link (`/product/...`) serves the cached home
+  fallback as designed.
+
 ## Blocked on owner input
 
 - **Product/aisle image bytes** (`M-02`): Supabase image transformations are
