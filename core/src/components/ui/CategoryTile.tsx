@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, ShoppingBasket } from "lucide-react";
 import { cn } from "../../lib/format";
+import { sizedImage } from "../../lib/images";
 import type { Category } from "../../lib/types";
 
 export function CategoryTile({ category }: { category: Category }) {
@@ -12,7 +13,7 @@ export function CategoryTile({ category }: { category: Category }) {
       <span className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-[var(--lm-radius-card)] border border-line bg-primary-tint">
         {category.image_url ? (
           <img
-            src={category.image_url}
+            src={sizedImage(category.image_url, 160) ?? undefined}
             alt=""
             loading="lazy"
             className="size-full object-cover"
@@ -50,7 +51,7 @@ export function CategoryChip({
 /** Horizontal category rail with a trailing "See all" tile. */
 export function CategoryRail({ categories }: { categories: Category[] }) {
   return (
-    <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">
+    <div className="-mx-4 flex min-h-[120px] gap-3 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">
       {categories.slice(0, 10).map((category) => (
         <div key={category.id} className="w-20 shrink-0">
           <CategoryTile category={category} />

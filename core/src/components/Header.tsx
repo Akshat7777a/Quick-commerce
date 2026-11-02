@@ -83,7 +83,6 @@ export function Header() {
             setPinError("");
             setPinOpen(true);
           }}
-          aria-label={`Delivery PIN code ${shownPin || "not set"}, change`}
           className="flex min-w-0 flex-1 items-center gap-1.5 rounded-[var(--lm-radius-control)] px-2 py-1 text-left transition hover:bg-cream-2"
         >
           <MapPin className="size-4 shrink-0 text-forest" aria-hidden="true" />
@@ -93,6 +92,7 @@ export function Header() {
               {shownPin ? `PIN ${shownPin}` : "Set your area"}
             </span>
           </span>
+          <span className="sr-only">, change PIN code</span>
         </button>
 
         <InstallButton className="hidden lg:inline-flex" />

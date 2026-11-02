@@ -204,6 +204,7 @@ export function Shop() {
         </aside>
 
         <div className="min-w-0 flex-1">
+          <h2 className="sr-only">Products</h2>
           <p className="text-[12px] leading-4 text-ink-soft">
             {loading
               ? "Loading products"

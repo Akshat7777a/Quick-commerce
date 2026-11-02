@@ -12,10 +12,8 @@ function bannerSrc(url: string, eager: boolean): string {
   try {
     const parsed = new URL(url);
     if (parsed.hostname !== "images.unsplash.com") return url;
-    if (eager) {
-      parsed.searchParams.set("w", "800");
-      parsed.searchParams.set("q", "75");
-    }
+    parsed.searchParams.set("w", eager ? "1200" : "800");
+    parsed.searchParams.set("q", "70");
     return parsed.toString();
   } catch {
     return url;
@@ -67,6 +65,9 @@ const tones = {
 
 export function BannerCarousel({ banners, loading = false }: { banners: Banner[]; loading?: boolean }) {
   const [index, setIndex] = useState(0);
+  const [wide, setWide] = useState(() =>
+    typeof window === "undefined" ? false : window.matchMedia("(min-width: 640px)").matches,
+  );
   const total = banners.length;
 
   useEffect(() => {
@@ -76,10 +77,17 @@ export function BannerCarousel({ banners, loading = false }: { banners: Banner[]
   // Reserve the hero's height while first paint is waiting on the banners
   // request: without this the whole page jumps down by ~26rem once they land
   // (measured CLS 0.438 on a cold Slow-4G load).
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 640px)");
+    const update = () => setWide(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
   if (total === 0 && loading) {
     return (
       <section className="container-page pt-5 sm:pt-8" aria-hidden="true">
-        <div className="min-h-[17rem] rounded-[1.5rem] bg-cream-2 animate-pulse shadow-soft sm:min-h-[21rem] sm:rounded-[2rem] lg:min-h-[24rem]" />
+        <div className="h-[17rem] rounded-[var(--lm-radius-card)] bg-cream-2 animate-pulse sm:h-[21rem] lg:h-[24rem]" />
       </section>
     );
   }
@@ -100,13 +108,14 @@ export function BannerCarousel({ banners, loading = false }: { banners: Banner[]
             <div
               key={banner.id}
               aria-hidden={!active}
+              inert={!active}
               className={cn(
                 "transition-opacity duration-200",
                 active ? "relative opacity-100" : "pointer-events-none absolute inset-0 opacity-0",
                 tone.wrapper,
               )}
             >
-              {banner.image_url && (
+              {wide && banner.image_url && (
                 <img
                   src={bannerSrc(banner.image_url, slide === 0)}
                   alt=""
@@ -117,7 +126,7 @@ export function BannerCarousel({ banners, loading = false }: { banners: Banner[]
                 />
               )}
               <div className={cn("absolute inset-0", tone.overlay)} />
-              <div className="relative flex min-h-[17rem] flex-col justify-end p-5 sm:min-h-[21rem] sm:p-10 lg:min-h-[24rem]">
+              <div className="relative flex h-[17rem] flex-col justify-end p-5 sm:h-[21rem] sm:p-10 lg:h-[24rem]">
                 <div className="max-w-xl">
                   {banner.eyebrow && (
                     <p className={cn("text-[10px] font-medium uppercase tracking-[0.28em]", tone.eyebrow)}>

@@ -39,7 +39,7 @@ export function InstallButton({ className }: { className?: string }) {
       <button
         type="button"
         onClick={install}
-        aria-label="Install L MART on your device"
+        aria-label="Install app: add L MART to your home screen"
         className={cn(
           "btn btn-secondary btn-sm shrink-0 gap-1.5",
           className,

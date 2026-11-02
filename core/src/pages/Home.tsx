@@ -5,7 +5,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { BannerCarousel } from "../components/BannerCarousel";
 import { CategoryRail } from "../components/ui/CategoryTile";
-import { ProductTile, ProductTileSkeleton } from "../components/ui/ProductTile";
+import { ProductTile } from "../components/ui/ProductTile";
 import { StateBlock } from "../components/ui/Primitives";
 import type { Banner, Category, Order, Product } from "../lib/types";
 
@@ -125,23 +125,16 @@ export function Home() {
 
   return (
     <div className="pb-6">
-      {categories.length > 0 && (
-        <section className="container-page pt-3">
+      <section className="container-page pt-3">
+        {categories.length > 0 ? (
           <CategoryRail categories={categories} />
-        </section>
-      )}
+        ) : (
+          <div className="ui-skeleton h-[120px] w-full" />
+        )}
+      </section>
 
       <BannerCarousel banners={banners} loading={loading} />
 
-      {loading && (
-        <section className="container-page mt-8">
-          <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <ProductTileSkeleton key={index} />
-            ))}
-          </div>
-        </section>
-      )}
 
       {orderAgain.length > 0 && (
         <ProductRow title="Order again" href="/orders">

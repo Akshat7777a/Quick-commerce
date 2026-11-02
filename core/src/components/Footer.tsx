@@ -67,10 +67,10 @@ export function Footer() {
         <div className="mt-8 flex flex-col gap-2 border-t border-line pt-4 text-[12px] leading-4 text-ink-soft sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} L MART ONLINE</p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <Link to="/privacy" className="transition hover:text-ink">Privacy Policy</Link>
-            <Link to="/terms" className="transition hover:text-ink">Terms and Conditions</Link>
-            <Link to="/refunds" className="transition hover:text-ink">Refund and Cancellation</Link>
-            <Link to="/account" className="transition hover:text-ink">Contact the store</Link>
+            <Link to="/privacy" className="inline-flex min-h-11 items-center transition hover:text-ink">Privacy Policy</Link>
+            <Link to="/terms" className="inline-flex min-h-11 items-center transition hover:text-ink">Terms and Conditions</Link>
+            <Link to="/refunds" className="inline-flex min-h-11 items-center transition hover:text-ink">Refund and Cancellation</Link>
+            <Link to="/account" className="inline-flex min-h-11 items-center transition hover:text-ink">Contact the store</Link>
           </div>
         </div>
       </div>
