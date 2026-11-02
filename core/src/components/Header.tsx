@@ -1,265 +1,188 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import {
-  Home,
-  LayoutGrid,
-  Moon,
-  Search,
-  Shapes,
-  ShoppingBag,
-  Sun,
-  Tag,
-  User,
-  UserRound,
-  X,
-} from "lucide-react";
-import { api } from "../lib/api";
-import { useAuth } from "../lib/auth";
+import { useState } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Home as HomeIcon, LayoutGrid, MapPin, Shapes, ShoppingBag, User } from "lucide-react";
 import { useCart } from "../lib/cart";
 import { useStoreSettings } from "../lib/store";
-import { cn } from "../lib/format";
-import type { Category } from "../lib/types";
+import { useToast } from "../lib/toast";
+import { inr } from "../lib/format";
+import { serviceablePincodes } from "../lib/delivery";
+import { SearchBar } from "./ui/SearchBar";
+import { Sheet } from "./ui/Sheet";
+import { Button } from "./ui/Button";
+import { Field } from "./ui/Field";
 import { InstallButton } from "./InstallButton";
 
+const PIN_KEY = "lmart.pincode.v1";
+
+function readPin() {
+  try {
+    return localStorage.getItem(PIN_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writePin(pin: string) {
+  try {
+    localStorage.setItem(PIN_KEY, pin);
+  } catch {
+    /* storage blocked: the pincode still works for this visit */
+  }
+}
+
 export function Header() {
-  const { settings, mode, toggleMode } = useStoreSettings();
+  const { settings } = useStoreSettings();
   const { count, openCart } = useCart();
-  const { user, isAdmin } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [params] = useSearchParams();
-  const [categories, setCategories] = useState<Category[]>([]);
   const [term, setTerm] = useState("");
+  const [pin, setPin] = useState(readPin);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinInput, setPinInput] = useState(pin);
+  const [pinError, setPinError] = useState("");
 
-  useEffect(() => {
-    api
-      .listCategories()
-      .then(setCategories)
-      .catch(() => setCategories([]));
-  }, []);
+  const allowed = serviceablePincodes(settings);
+  const shownPin = pin || allowed[0] || "";
 
-  useEffect(() => {
-    if (location.pathname === "/shop") setTerm(params.get("q") ?? "");
-    else setTerm("");
-  }, [location.pathname, params]);
-
-  const submitSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-    const query = term.trim();
-    navigate(query ? `/shop?q=${encodeURIComponent(query)}` : "/shop");
+  const savePin = () => {
+    const digits = pinInput.replace(/\D/g, "").slice(0, 6);
+    if (digits.length !== 6) {
+      setPinError("Enter the full 6-digit PIN code.");
+      return;
+    }
+    if (!allowed.includes(digits)) {
+      setPinError(`We do not deliver to ${digits} yet.`);
+      return;
+    }
+    writePin(digits);
+    setPin(digits);
+    setPinError("");
+    setPinOpen(false);
+    toast(`Delivering to ${digits}`);
   };
 
-  const activeCategory = params.get("category");
-  const onShopPage = location.pathname === "/shop";
+  const deliveryFacts = [
+    settings.is_open ? "Open now" : "Closed right now",
+    settings.delivery_estimate,
+    "Cash on delivery",
+    settings.min_order > 0 ? `Minimum order ${inr(settings.min_order)}` : null,
+  ].filter(Boolean) as string[];
 
   return (
-    <header className="sticky top-0 z-40">
-      <div className="bg-forest text-cream">
-        <div className="container-page flex h-9 items-center justify-between gap-4 text-[11px] tracking-wide">
-          <p className="truncate text-cream/85">{settings.announcement ?? "Cash on delivery available"}</p>
-          <div className="flex shrink-0 items-center gap-3 text-cream/70 sm:gap-5">
-            <InstallButton />
-            <span className="hidden items-center gap-1.5 sm:inline-flex">
-              <span
-                className={cn(
-                  "size-1.5 rounded-full",
-                  settings.is_open ? "bg-[#a4d8b4]" : "bg-clay",
-                )}
-              />
-              {settings.is_open ? "Open now" : "Closed"}
-            </span>
-            <span className="hidden lg:inline">Cash on delivery</span>
-          </div>
-        </div>
-      </div>
+    <header className="border-b border-line bg-cream">
+      <div className="container-page flex items-center gap-2 py-2">
+        <Link to="/" className="flex shrink-0 items-baseline gap-0.5" aria-label="L MART home">
+          <span className="text-[16px] font-semibold leading-6 tracking-tight text-ink">L MART</span>
+          <span className="text-[16px] font-semibold leading-6 text-gold">.</span>
+        </Link>
 
-      <div className="border-b border-line bg-cream">
-        <div className="container-page flex h-16 items-center gap-3 sm:h-[4.75rem] sm:gap-6">
-          <Link to="/" className="group flex shrink-0 items-center gap-2.5" aria-label="L MART ONLINE home">
-            <span className="grid size-9 place-items-center rounded-xl bg-forest text-cream font-display text-xl leading-none transition group-hover:bg-forest-2">
-              L
+        <button
+          type="button"
+          onClick={() => {
+            setPinInput(pin || allowed[0] || "");
+            setPinError("");
+            setPinOpen(true);
+          }}
+          aria-label={`Delivery PIN code ${shownPin || "not set"}, change`}
+          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-[var(--lm-radius-control)] px-2 py-1 text-left transition hover:bg-cream-2"
+        >
+          <MapPin className="size-4 shrink-0 text-forest" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="block text-[12px] leading-4 text-ink-soft">Delivering to</span>
+            <span className="block truncate text-[14px] font-medium leading-5 text-ink">
+              {shownPin ? `PIN ${shownPin}` : "Set your area"}
             </span>
-            <span className="leading-none">
-              <span className="block font-display text-[22px] leading-none tracking-tight text-ink sm:text-[25px]">
-                L MART<span className="text-gold">.</span>
-              </span>
-              <span className="mt-1 block text-[8px] font-medium uppercase tracking-[0.34em] text-ink-soft">
-                Online
-              </span>
-            </span>
-          </Link>
+          </span>
+        </button>
 
-          {!onShopPage && (
-          <form onSubmit={submitSearch} role="search" className="relative hidden flex-1 md:block md:max-w-lg">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-soft" />
-            <input
-              value={term}
-              onChange={(event) => setTerm(event.target.value)}
-              placeholder="Search the shelves: milk, bread, coffee…"
-              aria-label="Search products"
-              className="input h-11 pl-11 pr-10"
-            />
-            {term && (
-              <button
-                type="button"
-                onClick={() => setTerm("")}
-                aria-label="Clear search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-ink-soft transition hover:bg-cream-2 hover:text-ink"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
-          </form>
+        <InstallButton className="hidden lg:inline-flex" />
+
+        <button
+          type="button"
+          onClick={openCart}
+          aria-label={`Cart, ${count} item${count === 1 ? "" : "s"}`}
+          className="relative grid size-11 shrink-0 place-items-center rounded-[var(--lm-radius-control)] border border-line bg-white text-ink transition hover:border-forest"
+        >
+          <ShoppingBag className="size-5" aria-hidden="true" />
+          {count > 0 && (
+            <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-forest px-1.5 text-[12px] font-semibold leading-5 text-white">
+              {count > 99 ? "99+" : count}
+            </span>
           )}
+        </button>
+      </div>
 
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-            <Link
-              to="/offers"
-              className="hidden items-center gap-1.5 rounded-md px-3 py-2 text-[13px] text-ink-soft transition hover:bg-cream-2 hover:text-ink sm:inline-flex"
-            >
-              <Tag className="size-4" />
-              Offers
-            </Link>
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="hidden items-center gap-1.5 rounded-md border border-line px-3 py-2 text-[12px] text-ink-soft transition hover:border-ink hover:text-ink lg:inline-flex"
-              >
-                Admin
-              </Link>
-            )}
-            <button
-              type="button"
-              onClick={toggleMode}
-              className="grid size-11 place-items-center rounded-md text-ink-soft transition hover:bg-cream-2 hover:text-ink"
-              aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              title={mode === "dark" ? "Light mode" : "Dark mode"}
-            >
-              {mode === "dark" ? (
-                <Sun className="size-[17px]" />
-              ) : (
-                <Moon className="size-[17px]" />
-              )}
-            </button>
-            <Link
-              to={user ? "/account" : "/login"}
-              className="grid size-11 place-items-center rounded-md text-ink-soft transition hover:bg-cream-2 hover:text-ink"
-              aria-label={user ? "Your account" : "Sign in"}
-            >
-              {user ? (
-                <span className="grid size-8 place-items-center rounded-full bg-forest/10 text-[11px] font-semibold uppercase text-forest">
-                  {(user.email ?? "L").slice(0, 1)}
-                </span>
-              ) : (
-                <UserRound className="size-[18px]" />
-              )}
-            </Link>
-            <button
-              type="button"
-              onClick={openCart}
-              className="relative inline-flex min-h-11 items-center gap-2 rounded-md bg-forest pl-4 pr-1.5 text-cream text-base transition hover:bg-forest-2"
-              aria-label={`Open basket, ${count} item${count === 1 ? "" : "s"}`}
-            >
-              <span className="hidden text-[13px] font-medium sm:inline">Basket</span>
-              <ShoppingBag className="size-4 sm:hidden" />
-              <span className="grid size-7 place-items-center rounded-full bg-gold text-[11px] font-semibold text-[#2a1f08] tabular-nums">
-                {count}
-              </span>
-            </button>
-          </div>
-        </div>
+      <div className="container-page pb-2">
+        <SearchBar
+          value={term}
+          onChange={setTerm}
+          onSubmit={(value) => {
+            if (!value) return;
+            navigate(`/search?q=${encodeURIComponent(value)}`);
+          }}
+        />
+      </div>
 
-        {!onShopPage && (
-        <div className="container-page pb-3 md:hidden">
-          <form onSubmit={submitSearch} role="search" className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-soft" />
-            <input
-              value={term}
-              onChange={(event) => setTerm(event.target.value)}
-              placeholder="Search the shelves…"
-              aria-label="Search products"
-              className="input h-11 pl-11 pr-10"
-            />
-            {term && (
-              <button
-                type="button"
-                onClick={() => setTerm("")}
-                aria-label="Clear search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-ink-soft"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
-          </form>
-        </div>
-        )}
-
-        <div className={cn("hidden border-t border-line/80 md:block", onShopPage && "md:border-t-0")}>
-          <div className="container-page flex h-11 items-center gap-6 overflow-x-auto no-scrollbar">
-            <Link
-              to="/shop"
-              className={cn(
-                "shrink-0 py-2 text-base transition hover:text-ink",
-                location.pathname === "/shop" && !activeCategory
-                  ? "font-medium text-ink"
-                  : "text-ink-soft",
-              )}
-            >
-              All products
-            </Link>
-            {categories.slice(0, 7).map((category) => (
-              <Link
-                key={category.id}
-                to={`/shop?category=${category.slug}`}
-                className={cn(
-                  "shrink-0 py-2 text-base transition hover:text-ink",
-                  activeCategory === category.slug ? "font-medium text-ink" : "text-ink-soft",
-                )}
-              >
-                {category.name}
-              </Link>
-            ))}
-            <Link
-              to="/offers"
-              className="ml-auto hidden min-h-11 shrink-0 items-center gap-1.5 text-base text-clay transition hover:text-ink lg:inline-flex"
-            >
-              <Tag className="size-3.5" />
-              Today&apos;s offers
-            </Link>
-          </div>
+      <div className="border-t border-line">
+        <div className="container-page flex flex-wrap items-center gap-x-3 gap-y-0.5 py-1.5 text-[12px] leading-4 text-ink-soft">
+          {deliveryFacts.map((fact, index) => (
+            <span key={fact} className="flex items-center gap-3">
+              {index > 0 && <span aria-hidden="true">·</span>}
+              <span className={fact === "Closed right now" ? "text-warning" : undefined}>{fact}</span>
+            </span>
+          ))}
         </div>
       </div>
+
+      <Sheet
+        open={pinOpen}
+        onClose={() => setPinOpen(false)}
+        title="Where should we deliver?"
+        footer={
+          <Button block onClick={savePin}>
+            Save pincode
+          </Button>
+        }
+      >
+        <Field
+          label="PIN code"
+          inputMode="numeric"
+          autoComplete="postal-code"
+          maxLength={6}
+          placeholder="312601"
+          value={pinInput}
+          onChange={(event) => {
+            setPinInput(event.target.value.replace(/\D/g, "").slice(0, 6));
+            setPinError("");
+          }}
+          error={pinError || undefined}
+          hint={`We currently deliver to ${allowed.join(", ")}.`}
+        />
+        <p className="mt-4 text-[12px] leading-4 text-ink-soft">
+          This only checks your area. Your delivery address is confirmed again at checkout.
+        </p>
+      </Sheet>
     </header>
   );
 }
 
 const mobileTabs = [
-  { to: "/", label: "Home", icon: Home, end: true },
+  { to: "/", label: "Home", icon: HomeIcon, end: true },
   { to: "/shop", label: "Shop", icon: LayoutGrid, end: false },
   { to: "/categories", label: "Categories", icon: Shapes, end: false },
   { to: "/account", label: "Account", icon: User, end: false },
 ];
 
 export function MobileNav() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/checkout")) return null;
+
   return (
-    <nav
-      aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-cream safe-bottom"
-    >
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white safe-bottom" aria-label="Primary">
       <div className="grid grid-cols-4">
         {mobileTabs.map((tab) => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            end={tab.end}
-            className={({ isActive }) =>
-              cn(
-                "flex min-h-11 flex-col items-center justify-center gap-0.5 py-1 text-[10.5px] tracking-wide transition",
-                isActive ? "text-forest" : "text-ink-soft",
-              )
-            }
-          >
-            <tab.icon className="size-4" strokeWidth={1.7} aria-hidden="true" />
+          <NavLink key={tab.to} to={tab.to} end={tab.end} className="ui-navtab">
+            <tab.icon className="size-5" strokeWidth={1.6} aria-hidden="true" />
             {tab.label}
           </NavLink>
         ))}

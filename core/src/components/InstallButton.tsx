@@ -41,11 +41,11 @@ export function InstallButton({ className }: { className?: string }) {
         onClick={install}
         aria-label="Install L MART on your device"
         className={cn(
-          "inline-flex shrink-0 items-center gap-1.5 rounded-md bg-cream/12 px-2.5 py-1 text-[10.5px] font-medium text-cream ring-1 ring-inset ring-cream/25 transition hover:bg-cream/25 hover:text-cream",
+          "btn btn-secondary btn-sm shrink-0 gap-1.5",
           className,
         )}
       >
-        <Download className="size-3" strokeWidth={2} />
+        <Download className="size-3.5" strokeWidth={1.8} />
         Install app
       </button>
 

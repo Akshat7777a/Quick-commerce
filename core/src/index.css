@@ -23,6 +23,10 @@
   --color-clay: var(--lm-error);
   --color-line: var(--lm-border);
   --color-card: var(--lm-surface);
+  --color-primary: var(--lm-primary);
+  --color-primary-tint: var(--lm-primary-tint);
+  --color-warning: var(--lm-warning);
+  --color-error: var(--lm-error);
 
   --shadow-soft: var(--lm-shadow-sticky);
   --shadow-lift: var(--lm-shadow-sticky);

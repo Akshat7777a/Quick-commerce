@@ -12,7 +12,7 @@ export function CartBar() {
   if (count === 0) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40 px-3 pb-2 md:hidden">
+    <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-40 px-3 pb-2 md:hidden">
       <button
         type="button"
         onClick={openCart}

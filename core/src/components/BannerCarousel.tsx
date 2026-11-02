@@ -67,16 +67,7 @@ const tones = {
 
 export function BannerCarousel({ banners, loading = false }: { banners: Banner[]; loading?: boolean }) {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
   const total = banners.length;
-
-  useEffect(() => {
-    if (total <= 1 || paused) return;
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % total);
-    }, 7000);
-    return () => window.clearInterval(timer);
-  }, [total, paused]);
 
   useEffect(() => {
     if (index > total - 1) setIndex(0);
@@ -101,8 +92,6 @@ export function BannerCarousel({ banners, loading = false }: { banners: Banner[]
     <section className="container-page pt-5 sm:pt-8" aria-roledescription="carousel" aria-label="Featured offers">
       <div
         className="relative overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
       >
         {banners.map((banner, slide) => {
           const tone = tones[banner.tone] ?? tones.forest;
