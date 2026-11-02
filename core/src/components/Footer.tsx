@@ -69,7 +69,7 @@ export function Footer() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <Link to="/privacy" className="transition hover:text-ink">Privacy Policy</Link>
             <Link to="/terms" className="transition hover:text-ink">Terms and Conditions</Link>
-            <Link to="/terms" className="transition hover:text-ink">Refund and Cancellation</Link>
+            <Link to="/refunds" className="transition hover:text-ink">Refund and Cancellation</Link>
             <Link to="/account" className="transition hover:text-ink">Contact the store</Link>
           </div>
         </div>

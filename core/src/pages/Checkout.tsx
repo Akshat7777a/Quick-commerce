@@ -1,44 +1,27 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { readJSON, removeKey, writeJSON } from "../lib/storage";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import {
-  ArrowRight,
-  Banknote,
-  CheckCircle2,
-  Clock3,
-  MapPin,
-  MessageCircle,
-  PackageCheck,
-  ShieldCheck,
-  ShoppingBag,
-  Tag,
-  Truck,
-} from "lucide-react";
+import { Banknote, CheckCircle2, Clock3, MessageCircle, ShieldCheck, ShoppingBag } from "lucide-react";
 import { api, errorMessage } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useCart } from "../lib/cart";
-import {
-  STORE_CITY_LABEL,
-  deliveryOptions,
-  extractPincode,
-  serviceablePincodes,
-} from "../lib/delivery";
+import { STORE_CITY_LABEL, deliveryOptions, extractPincode, serviceablePincodes } from "../lib/delivery";
 import { useStoreSettings } from "../lib/store";
 import { useToast } from "../lib/toast";
 import { inr } from "../lib/format";
-import { EmptyState, ProductImage, Spinner } from "../components/ui";
+import { ProductImage } from "../components/ui";
+import { Field, TextAreaField } from "../components/ui/Field";
+import { Button } from "../components/ui/Button";
+import { Spinner, StateBlock } from "../components/ui/Primitives";
 import { PatchSlot, runPatchHooks } from "../lib/patch-loader";
 import type { PlaceOrderResult } from "../lib/types";
 
-/** Half-filled delivery details survive a reload or a discarded background tab. */
 const DRAFT_KEY = "lmart.checkout.draft.v1";
 type Draft = { name?: string; phone?: string; address?: string; notes?: string; slot?: string };
 
-/** Client-side rate limiting on order submission (see map-based gate below). */
 const ORDER_GATE_KEY = "lmart.order.gate.v1";
 const ORDER_GATE_MS = 45_000;
 
-/** One ordered line shown on the confirmation screen. */
 type OrderedItem = { id: string; name: string; unit: string; price: number; quantity: number };
 
 export function Checkout() {
@@ -69,12 +52,19 @@ export function Checkout() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PlaceOrderResult | null>(null);
   const [orderedItems, setOrderedItems] = useState<OrderedItem[]>([]);
+  const [couponsExist, setCouponsExist] = useState(false);
 
-  // The draft is saved as the customer types, so a reload, a switch to another
-  // tab, or a browser-discarded background tab comes back exactly as left.
   useEffect(() => {
     writeJSON(DRAFT_KEY, { name, phone, address, notes, slot } satisfies Draft);
   }, [name, phone, address, notes, slot]);
+
+  useEffect(() => {
+    api
+      .listCoupons()
+      .then((rows) => setCouponsExist(rows.length > 0))
+      .catch(() => undefined);
+  }, []);
+
   const pinList = serviceablePincodes(settings);
   const slotOptions = deliveryOptions(settings);
   const chosenSlot = slot || slotOptions[0] || "";
@@ -109,52 +99,47 @@ export function Checkout() {
 
   if (result) {
     return (
-      <div className="container-page py-12 sm:py-20">
-        <div className="mx-auto max-w-xl overflow-hidden rounded-[1.75rem] border border-line bg-card shadow-soft">
-          <div className="bg-forest px-7 py-9 text-cream sm:px-9">
-            <CheckCircle2 className="size-8 text-gold" strokeWidth={1.5} />
-            <p className="mt-4 text-[10px] uppercase tracking-[0.24em] text-cream/60">Order confirmed</p>
-            <h1 className="mt-2 text-4xl leading-none">Thank you, {name.split(" ")[0] || "friend"}.</h1>
-            <p className="mt-3 text-[12.5px] leading-relaxed text-cream/70">
-              We&apos;re packing your basket now. Keep {inr(result.total)} ready in cash for delivery.
+      <div className="container-page py-6">
+        <div className="mx-auto max-w-xl rounded-[var(--lm-radius-card)] border border-line bg-white">
+          <div className="border-b border-line px-5 py-6">
+            <CheckCircle2 className="size-8 text-forest" strokeWidth={1.5} />
+            <h1 className="mt-3 text-[20px] font-semibold leading-7 text-ink">Order placed</h1>
+            <p className="mt-1 text-[14px] leading-5 text-ink-soft">
+              Thank you, {name.split(" ")[0] || "friend"}. Keep {inr(result.total)} ready in cash.
             </p>
           </div>
-          <div className="px-7 py-6 sm:px-9">
-            <dl className="space-y-3 text-[12.5px]">
+          <div className="px-5 py-4">
+            <dl className="space-y-2 text-[14px] leading-5">
               <div className="flex items-center justify-between">
                 <dt className="text-ink-soft">Order number</dt>
-                <dd className="font-semibold tracking-wide text-ink">{result.order_number}</dd>
+                <dd className="font-semibold text-ink">{result.order_number}</dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-ink-soft">Payment</dt>
                 <dd className="flex items-center gap-1.5 text-ink">
-                  <Banknote className="size-3.5 text-forest" /> Cash on delivery
+                  <Banknote className="size-4 text-forest" aria-hidden="true" /> Cash on delivery
                 </dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-ink-soft">Amount due</dt>
-                <dd className="price text-base font-semibold text-ink">{inr(result.total)}</dd>
+                <dd className="price text-[16px] font-semibold text-ink">{inr(result.total)}</dd>
               </div>
-              <div className="flex items-start justify-between gap-6">
+              <div className="flex items-start justify-between gap-4">
                 <dt className="shrink-0 text-ink-soft">Delivering to</dt>
-                <dd className="text-right leading-relaxed text-ink">{address}</dd>
+                <dd className="text-right leading-5 text-ink">{address}</dd>
               </div>
-              <div className="flex items-start justify-between gap-6">
+              <div className="flex items-start justify-between gap-4">
                 <dt className="shrink-0 text-ink-soft">Delivery time</dt>
-                <dd className="text-right leading-relaxed text-ink">{chosenSlot}</dd>
+                <dd className="text-right leading-5 text-ink">{chosenSlot}</dd>
               </div>
             </dl>
 
             {orderedItems.length > 0 && (
-              <ul className="mt-5 divide-y divide-line/70">
+              <ul className="mt-4 divide-y divide-line">
                 {orderedItems.map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex items-center justify-between gap-4 py-2.5 text-[12.5px] first:pt-0"
-                  >
-                    <span className="min-w-0 leading-snug text-ink">
-                      {item.quantity} × {item.name}
-                      <span className="text-ink-soft"> · {item.unit}</span>
+                  <li key={item.id} className="flex items-center justify-between gap-3 py-2 text-[14px] leading-5">
+                    <span className="min-w-0 leading-5 text-ink">
+                      {item.quantity} x {item.name}
                     </span>
                     <span className="price shrink-0 font-medium">{inr(item.price * item.quantity)}</span>
                   </li>
@@ -162,48 +147,34 @@ export function Checkout() {
               </ul>
             )}
 
-            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => navigate("/orders")}
-                className="btn btn-primary flex-1"
-              >
-                View your orders
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/shop")}
-                className="btn btn-secondary flex-1"
-              >
-                Keep shopping
-              </button>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Button className="flex-1" onClick={() => navigate("/orders")}>
+                Track order
+              </Button>
+              <Button variant="secondary" className="flex-1" onClick={() => navigate("/shop")}>
+                Continue shopping
+              </Button>
             </div>
+
             {result.waUrl && (
-              <div className="mt-3 text-center">
-                <a
-                  href={result.waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[11px] text-forest underline underline-offset-2 hover:text-clay"
-                >
-                  <MessageCircle className="size-4" /> Send order details to our WhatsApp
-                </a>
-              </div>
+              <a
+                href={result.waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex items-center justify-center gap-2 text-[12px] leading-4 text-forest underline underline-offset-2"
+              >
+                <MessageCircle className="size-4" /> Send order details to the shop on WhatsApp
+              </a>
             )}
+
             {settings.phone && (
-              <p className="mt-4 text-center text-[10.5px] leading-relaxed text-ink-soft">
-                Questions about this order? Call the shop:{" "}
-                <a
-                  href={`tel:${settings.phone.replace(/\s/g, "")}`}
-                  className="text-forest underline underline-offset-2"
-                >
+              <p className="mt-3 text-center text-[12px] leading-4 text-ink-soft">
+                Questions? Call the shop:{" "}
+                <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="text-forest underline underline-offset-2">
                   {settings.phone}
                 </a>
               </p>
             )}
-            <p className="mt-4 text-center text-[10.5px] leading-relaxed text-ink-soft">
-              {settings.delivery_estimate} · We&apos;ll call {phone} if we need to check anything.
-            </p>
           </div>
         </div>
       </div>
@@ -212,14 +183,14 @@ export function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="container-page py-14">
-        <EmptyState
+      <div className="container-page py-8">
+        <StateBlock
           icon={<ShoppingBag className="size-5" />}
-          title="Your basket is empty"
-          description="Add a few essentials before checking out. We'll keep them here for you."
+          title="Your cart is empty"
+          description="Add a few essentials before checking out. We keep them in your cart."
           action={
             <Link to="/shop" className="btn btn-primary">
-              Browse the shelves
+              Browse the shop
             </Link>
           }
         />
@@ -244,9 +215,6 @@ export function Checkout() {
     }
     if (!chosenSlot) return setError("Please choose a delivery time.");
 
-    // Client-side rate limit: one order per device per 45 seconds. Server-side
-    // enforcement is a separate task (the database function change needs a
-    // signed-off migration).
     const lastOrderAt = readJSON<number>(ORDER_GATE_KEY) ?? 0;
     if (lastOrderAt && Date.now() - lastOrderAt < ORDER_GATE_MS) {
       return setError(
@@ -256,16 +224,12 @@ export function Checkout() {
 
     setBusy(true);
     try {
-      // Patches get a veto before the order is created (blocking: a throw
-      // aborts the submit; the message lands in the normal error box).
       try {
-        await runPatchHooks("before-checkout", {
-          items,
-          total,
-          phone: phone.trim(),
-          address: address.trim(),
-          slot: chosenSlot,
-        }, { blocking: true });
+        await runPatchHooks(
+          "before-checkout",
+          { items, total, phone: phone.trim(), address: address.trim(), slot: chosenSlot },
+          { blocking: true },
+        );
       } catch (hookError) {
         const message = hookError instanceof Error ? hookError.message : "We couldn't check that order.";
         return setError(message);
@@ -291,8 +255,6 @@ export function Checkout() {
           quantity: line.quantity,
         })),
       );
-      // A pre-filled WhatsApp message to the store gives the owner a second
-      // heads-up beside the admin dashboard.
       const storeDigits = (settings.phone ?? "").replace(/\D/g, "");
       const waMessage = [
         `New order ${placed.order_number}`,
@@ -307,9 +269,9 @@ export function Checkout() {
       setResult({ ...placed, waUrl });
       writeJSON(ORDER_GATE_KEY, Date.now());
       clear();
-      removeKey(DRAFT_KEY); // placed: the half-filled form no longer applies
+      removeKey(DRAFT_KEY);
       toast("Order placed: cash on delivery");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0 });
       await runPatchHooks("after-checkout", { order: placed });
     } catch (caught) {
       setError(errorMessage(caught, "We couldn't place your order. Please try again."));
@@ -330,117 +292,83 @@ export function Checkout() {
     }
   };
 
-  return (
-    <div className="container-page pt-8 sm:pt-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">Checkout</p>
-        <h1 className="text-4xl leading-tight text-ink sm:text-5xl">Almost at your door.</h1>
-        <p className="max-w-lg text-[13px] leading-relaxed text-ink-soft">
-          Tell us where to bring the basket. You pay in cash when it arrives, no card details needed.
-        </p>
-      </div>
+  const pin = extractPincode(address);
+  const outside = pin !== null && !pinList.includes(pin);
 
-      <form onSubmit={submit} className="mt-8 grid grid-cols-1 gap-8 pb-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-        <div className="space-y-6">
-          <section className="card p-5 sm:p-6">
-            <div className="flex items-center gap-2.5">
-              <MapPin className="size-4 text-forest" />
-              <h2 className="text-xl text-ink">Delivery details</h2>
-            </div>
+  return (
+    <div className="container-page pb-28 pt-4 md:pb-8">
+      <h1 className="text-[20px] font-semibold leading-7 text-ink">Checkout</h1>
+      <p className="mt-1 max-w-lg text-[14px] leading-5 text-ink-soft">
+        Tell us where to deliver. You pay in cash when it arrives.
+      </p>
+
+      <form id="checkout-form" onSubmit={submit} className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
+        <div className="space-y-4">
+          <section className="rounded-[var(--lm-radius-card)] border border-line bg-white p-4">
+            <h2 className="text-[16px] font-semibold leading-5 text-ink">Delivery details</h2>
 
             {error && (
-              <p
-                role="alert"
-                className="mt-4 rounded-xl border border-clay/20 bg-clay/[0.06] px-3.5 py-2.5 text-[12px] leading-relaxed text-clay"
-              >
+              <p role="alert" className="mt-3 rounded-[var(--lm-radius-control)] bg-clay/5 px-3 py-2 text-[12px] leading-4 text-clay">
                 {error}
               </p>
             )}
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="label">Full name</span>
-                <input
-                  required
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  autoComplete="name"
-                  placeholder="Ananya Rao"
-                  className="input"
-                />
-              </label>
-              <label className="block">
-                <span className="label">Phone number</span>
-                <input
-                  required
-                  type="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  autoComplete="tel"
-                  placeholder="+91 98765 43210"
-                  className="input"
-                />
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="label">Delivery address</span>
-                <textarea
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <Field
+                label="Full name"
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                autoComplete="name"
+                placeholder="Ananya Rao"
+              />
+              <Field
+                label="Phone number"
+                required
+                type="tel"
+                inputMode="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                autoComplete="tel"
+                placeholder="+91 98765 43210"
+              />
+              <div className="sm:col-span-2">
+                <TextAreaField
+                  label="Delivery address"
                   required
                   rows={3}
                   value={address}
                   onChange={(event) => setAddress(event.target.value)}
                   autoComplete="street-address"
                   placeholder="Flat, building, street, landmark, city, pincode"
-                  className="input resize-none leading-relaxed"
+                  error={outside ? `We do not deliver to PIN ${pin} yet.` : undefined}
+                  hint={`We deliver to PIN ${pinList.join(", ")} in ${STORE_CITY_LABEL}.`}
                 />
-                {(() => {
-                  const pin = extractPincode(address);
-                  const outside = pin !== null && !pinList.includes(pin);
-                  if (outside) {
-                    return (
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-clay">
-                        We don't deliver to PIN {pin} yet. We currently serve PIN{" "}
-                        {pinList.join(", ")} ({STORE_CITY_LABEL}).
-                      </p>
-                    );
-                  }
-                  return (
-                    <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-soft">
-                      {pin ? `PIN ${pin}: ` : ""}We deliver to PIN {pinList.join(", ")} · {STORE_CITY_LABEL}.
-                    </p>
-                  );
-                })()}
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="label">Notes for the shop (optional)</span>
-                <input
+              </div>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Notes for the shop (optional)"
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
-                  placeholder="Ring the bell twice, leave at the gate…"
-                  className="input"
+                  placeholder="Ring the bell twice, leave at the gate"
                 />
-              </label>
+              </div>
             </div>
           </section>
 
-          <section className="card p-5 sm:p-6">
-            <div className="flex items-center gap-2.5">
-              <Clock3 className="size-4 text-forest" />
-              <h2 className="text-xl text-ink">Delivery time</h2>
-            </div>
-            <p className="mt-1 text-[11.5px] leading-relaxed text-ink-soft">
-              Choose when the basket should arrive, we'll work to that slot.
-            </p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <section className="rounded-[var(--lm-radius-card)] border border-line bg-white p-4">
+            <h2 className="flex items-center gap-2 text-[16px] font-semibold leading-5 text-ink">
+              <Clock3 className="size-4 text-forest" aria-hidden="true" /> Delivery time
+            </h2>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {slotOptions.map((option) => {
                 const active = chosenSlot === option;
                 return (
                   <label
                     key={option}
                     className={
-                      "flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition " +
-                      (active
-                        ? "border-forest bg-forest/[0.05]"
-                        : "border-line hover:border-ink/30")
+                      "flex cursor-pointer items-center gap-2.5 rounded-[var(--lm-radius-control)] border px-3 py-2.5 transition " +
+                      (active ? "border-forest bg-primary-tint" : "border-line hover:border-forest/40")
                     }
                   >
                     <input
@@ -453,172 +381,159 @@ export function Checkout() {
                     <span
                       className={
                         "grid size-4 shrink-0 place-items-center rounded-full border-2 " +
-                        (active ? "border-forest" : "border-ink-soft/50")
+                        (active ? "border-forest" : "border-ink-soft/40")
                       }
                     >
                       {active && <span className="size-2 rounded-full bg-forest" />}
                     </span>
-                    <span className="text-[12.5px] leading-snug text-ink">{option}</span>
+                    <span className="text-[14px] leading-5 text-ink">{option}</span>
                   </label>
                 );
               })}
             </div>
           </section>
 
-          <section className="card p-5 sm:p-6">
-            <div className="flex items-center gap-2.5">
-              <Banknote className="size-4 text-forest" />
-              <h2 className="text-xl text-ink">Payment</h2>
-            </div>
-            <div className="mt-4 flex items-start gap-3 rounded-xl border border-forest/20 bg-forest/[0.04] px-4 py-3.5">
-              <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border-2 border-forest">
+          <section className="rounded-[var(--lm-radius-card)] border border-line bg-white p-4">
+            <h2 className="flex items-center gap-2 text-[16px] font-semibold leading-5 text-ink">
+              <Banknote className="size-4 text-forest" aria-hidden="true" /> Payment
+            </h2>
+            <div className="mt-3 flex items-start gap-3 rounded-[var(--lm-radius-control)] border border-forest/20 bg-primary-tint px-3 py-2.5">
+              <span className="mt-1 grid size-4 shrink-0 place-items-center rounded-full border-2 border-forest">
                 <span className="size-2 rounded-full bg-forest" />
               </span>
               <div>
-                <p className="text-[13px] font-medium text-ink">Cash on delivery</p>
-                <p className="mt-0.5 text-[11.5px] leading-relaxed text-ink-soft">
-                  Keep {inr(total)} ready. Our delivery partner collects the exact amount at your door.
+                <p className="text-[14px] font-medium leading-5 text-ink">Cash on delivery</p>
+                <p className="mt-0.5 text-[12px] leading-4 text-ink-soft">
+                  Keep {inr(total)} ready. The delivery person collects it at your door.
                 </p>
               </div>
             </div>
-            <p className="mt-3 flex items-center gap-1.5 text-[10.5px] text-ink-soft">
-              <ShieldCheck className="size-3.5 text-forest" />
+            <p className="mt-2 flex items-center gap-1.5 text-[12px] leading-4 text-ink-soft">
+              <ShieldCheck className="size-4 text-forest" aria-hidden="true" />
               No online payment is taken at any point.
             </p>
           </section>
 
-          <div className="flex items-center gap-2 text-[11px] text-ink-soft">
-            <Truck className="size-3.5 text-forest" />
-            {settings.delivery_estimate ?? "Same-day delivery"} · Free over {inr(settings.free_delivery_above)}
-          </div>
+          <PatchSlot name="checkout-before-summary" />
         </div>
 
-        {/* Optional patch content ahead of the order summary. */}
-        <PatchSlot name="checkout-before-summary" />
-
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="card overflow-hidden">
-            <div className="border-b border-line px-5 py-4">
-              <h2 className="flex items-center gap-2 text-xl text-ink">
-                <PackageCheck className="size-4 text-forest" />
-                Your basket
-                <span className="text-ink-soft">({items.length})</span>
+        <aside className="lg:sticky lg:top-4 lg:self-start">
+          <div className="rounded-[var(--lm-radius-card)] border border-line bg-white">
+            <div className="border-b border-line px-4 py-3">
+              <h2 className="text-[16px] font-semibold leading-5 text-ink">
+                Order summary <span className="font-normal text-ink-soft">({items.length})</span>
               </h2>
             </div>
 
-            <ul className="max-h-[19rem] divide-y divide-line/70 overflow-y-auto px-5">
+            <ul className="max-h-64 divide-y divide-line overflow-y-auto px-4">
               {items.map(({ product, quantity }) => (
-                <li key={product.id} className="flex items-center gap-3 py-3">
-                  <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-cream-2">
-                    <ProductImage
-                      src={product.image_url}
-                      alt={product.name}
-                      className="size-full object-cover"
-                    />
-                    <span className="absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-forest text-[9px] font-semibold text-cream">
+                <li key={product.id} className="flex items-center gap-3 py-2.5">
+                  <div className="relative size-10 shrink-0 overflow-hidden rounded bg-white">
+                    <ProductImage src={product.image_url} alt={product.name} className="size-full object-contain" />
+                    <span className="absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-forest text-[10px] font-semibold text-white">
                       {quantity}
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12.5px] font-medium text-ink">{product.name}</p>
-                    <p className="text-[10.5px] text-ink-soft">{product.unit}</p>
+                    <p className="truncate text-[12px] font-medium leading-4 text-ink">{product.name}</p>
+                    <p className="text-[12px] leading-4 text-ink-soft">{product.unit}</p>
                   </div>
-                  <span className="price text-[12.5px] font-medium">{inr(product.price * quantity)}</span>
+                  <span className="price text-[12px] font-medium">{inr(product.price * quantity)}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="border-t border-line px-5 py-4">
-              {coupon ? (
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-forest/20 bg-forest/[0.04] px-3.5 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <Tag className="size-3.5 text-forest" />
-                    <span className="text-[11.5px] font-semibold tracking-wide text-forest">
-                      {coupon.code}
-                    </span>
-                    <span className="text-[11px] text-ink-soft">−{inr(coupon.discount)}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removeCoupon}
-                    className="text-[10.5px] text-ink-soft underline underline-offset-2 hover:text-clay"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={apply} className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Tag className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-soft" />
-                    <input
-                      value={code}
-                      onChange={(event) => setCode(event.target.value.toUpperCase())}
-                      placeholder="Coupon code"
-                      aria-label="Coupon code"
-                      className="input h-9 pl-8 text-[11.5px] uppercase tracking-wide"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={couponBusy || !code.trim()}
-                    className="btn btn-secondary btn-sm h-9 px-3.5"
-                  >
-                    {couponBusy ? <Spinner /> : "Apply"}
-                  </button>
-                </form>
+            <div className="border-t border-line px-4 py-3">
+              {(couponsExist || coupon) && (
+                <>
+                  {coupon ? (
+                    <div className="flex items-center justify-between gap-3 rounded-[var(--lm-radius-control)] border border-forest/20 bg-forest/5 px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[12px] font-semibold text-forest">{coupon.code}</span>
+                        <span className="text-[12px] text-ink-soft">-{inr(coupon.discount)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removeCoupon}
+                        className="text-[12px] text-ink-soft underline underline-offset-2 hover:text-clay"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={apply} className="mb-3 flex gap-2">
+                      <input
+                        value={code}
+                        onChange={(event) => setCode(event.target.value.toUpperCase())}
+                        placeholder="Coupon code"
+                        aria-label="Coupon code"
+                        className="input h-10 flex-1 text-[14px] uppercase"
+                      />
+                      <Button type="submit" variant="secondary" size="sm" disabled={couponBusy || !code.trim()}>
+                        {couponBusy ? <Spinner /> : "Apply"}
+                      </Button>
+                    </form>
+                  )}
+                </>
               )}
 
-              <dl className="mt-4 space-y-2 text-[12.5px]">
+              <dl className="space-y-1.5 text-[14px] leading-5">
                 <div className="flex justify-between text-ink-soft">
-                  <dt>Subtotal</dt>
+                  <dt>Item total</dt>
                   <dd className="price text-ink">{inr(subtotal)}</dd>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-[#1c6b3f]">
+                  <div className="flex justify-between text-forest">
                     <dt>Discount</dt>
-                    <dd className="price">−{inr(discount)}</dd>
+                    <dd className="price">-{inr(discount)}</dd>
                   </div>
                 )}
                 <div className="flex justify-between text-ink-soft">
                   <dt>Delivery</dt>
-                  <dd className={deliveryFee === 0 ? "text-[#1c6b3f]" : "text-ink"}>
+                  <dd className={deliveryFee === 0 ? "text-forest" : "text-ink"}>
                     {deliveryFee === 0 ? "Free" : inr(deliveryFee)}
                   </dd>
                 </div>
-                <div className="flex justify-between border-t border-line pt-2.5">
-                  <dt className="text-sm font-medium">To pay in cash</dt>
-                  <dd className="price text-base font-semibold">{inr(total)}</dd>
+                <div className="flex justify-between border-t border-line pt-2 text-[16px] font-semibold">
+                  <dt>To pay in cash</dt>
+                  <dd className="price">{inr(total)}</dd>
                 </div>
               </dl>
 
               {!settings.is_open && (
-                <p className="mt-3 rounded-lg bg-clay/10 px-3 py-2 text-[11px] leading-relaxed text-clay">
-                  The store is currently closed. Checkout reopens when the shop does.
+                <p className="mt-2 rounded-[var(--lm-radius-control)] bg-clay/5 px-3 py-2 text-[12px] leading-4 text-clay">
+                  The store is closed. Checkout reopens when the shop does.
                 </p>
               )}
 
-              <button
+              <Button
                 type="submit"
+                block
+                className="mt-3 hidden md:flex"
                 disabled={busy || !settings.is_open}
-                className="btn btn-primary mt-4 h-12 w-full justify-between px-5"
               >
-                <span>{busy ? "Placing your order…" : `Place order · ${inr(total)}`}</span>
-                {busy ? <Spinner /> : <ArrowRight className="size-4" />}
-              </button>
-              <p className="mt-2.5 text-center text-[10px] leading-relaxed text-ink-soft">
+                {busy ? "Placing your order" : `Place order · ${inr(total)}`}
+              </Button>
+              <p className="mt-2 text-center text-[12px] leading-4 text-ink-soft">
                 By placing this order you agree to pay {inr(total)} on delivery and to our{" "}
-                <Link to="/terms" className="underline underline-offset-2 hover:text-ink">
-                  Terms and Conditions
-                </Link>{" "}
-                and{" "}
-                <Link to="/privacy" className="underline underline-offset-2 hover:text-ink">
-                  Privacy Policy
-                </Link>.
+                <Link to="/terms" className="underline underline-offset-2 hover:text-ink">Terms</Link> and{" "}
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-ink">Privacy Policy</Link>.
               </p>
             </div>
           </div>
         </aside>
       </form>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white px-4 py-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] md:hidden">
+        <Button
+          type="submit"
+          form="checkout-form"
+          block
+          disabled={busy || !settings.is_open}
+        >
+          {busy ? "Placing your order" : `Place order · ${inr(total)}`}
+        </Button>
+      </div>
     </div>
   );
 }

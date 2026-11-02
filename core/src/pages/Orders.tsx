@@ -5,46 +5,12 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useCart } from "../lib/cart";
 import { useToast } from "../lib/toast";
-import { ORDER_STATUS, ORDER_STATUS_FLOW, cn, formatDateTime, inr } from "../lib/format";
-import { EmptyState, ProductImage, Skeleton, Spinner } from "../components/ui";
+import { ORDER_STATUS, cn, formatDateTime, inr } from "../lib/format";
+import { ProductImage, Spinner } from "../components/ui";
+import { StatusTimeline } from "../components/ui/StatusTimeline";
+import { Skeleton, StateBlock } from "../components/ui/Primitives";
+import { Button } from "../components/ui/Button";
 import type { Order, Product } from "../lib/types";
-
-function StatusTimeline({ status }: { status: string }) {
-  if (status === "cancelled") {
-    return (
-      <p className="mt-4 rounded-xl bg-clay/[0.07] px-3.5 py-2.5 text-[11.5px] text-clay">
-        This order was cancelled. No cash was collected.
-      </p>
-    );
-  }
-  const currentIndex = ORDER_STATUS_FLOW.indexOf(status as (typeof ORDER_STATUS_FLOW)[number]);
-
-  return (
-    <div className="mt-5 flex items-center gap-1.5">
-      {ORDER_STATUS_FLOW.map((step, index) => {
-        const done = index <= currentIndex;
-        return (
-          <div key={step} className="flex flex-1 flex-col gap-1.5">
-            <span
-              className={cn(
-                "h-1 rounded-full transition-colors",
-                done ? "bg-forest" : "bg-cream-2",
-              )}
-            />
-            <span
-              className={cn(
-                "text-[9.5px] uppercase tracking-[0.08em]",
-                done ? "text-forest" : "text-ink-soft/70",
-              )}
-            >
-              {ORDER_STATUS[step]?.label ?? step}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 export function Orders() {
   const { user, loading: authLoading } = useAuth();
@@ -53,6 +19,7 @@ export function Orders() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -108,36 +75,35 @@ export function Orders() {
       };
       add(product, item.quantity);
     });
-    toast("Your usual is back in the basket");
+    toast("Your usual is back in the cart");
     navigate("/checkout");
   };
 
   return (
-    <div className="container-page pt-8 sm:pt-12">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="container-page pt-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="eyebrow">Your history</p>
-          <h1 className="mt-2 text-4xl leading-tight text-ink sm:text-5xl">Order history</h1>
-          <p className="mt-2 max-w-md text-[13px] leading-relaxed text-ink-soft">
-            Every basket you&apos;ve placed with L MART, and a one-tap way to order it again.
+          <h1 className="text-[20px] font-semibold leading-7 text-ink">Your orders</h1>
+          <p className="mt-1 text-[14px] leading-5 text-ink-soft">
+            Every basket you have placed, and a one-tap way to order it again.
           </p>
         </div>
         {orders.length > 0 && (
-          <button type="button" onClick={openCart} className="btn btn-secondary btn-sm lg:hidden">
-            Open basket
-          </button>
+          <Button variant="secondary" size="sm" onClick={openCart} className="lg:hidden">
+            Open cart
+          </Button>
         )}
       </div>
 
-      <div className="mt-8 pb-6">
+      <div className="mt-4 pb-4">
         {loading ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[0, 1].map((index) => (
-              <Skeleton key={index} className="h-56 w-full rounded-[1.35rem]" />
+              <Skeleton key={index} className="h-40 w-full" />
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <EmptyState
+          <StateBlock
             icon={<PackageCheck className="size-5" />}
             title="No orders yet"
             description="Your first basket is waiting to be filled. Once you order, everything shows up here."
@@ -148,84 +114,117 @@ export function Orders() {
             }
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {orders.map((order) => {
               const meta = ORDER_STATUS[order.status] ?? ORDER_STATUS.placed;
+              const isOpen = expanded === order.id;
+              const itemCount = order.order_items?.length ?? 0;
               return (
-                <article key={order.id} className="card overflow-hidden">
-                  <div className="flex items-start justify-between gap-3 border-b border-line px-5 py-4 sm:px-6">
+                <article key={order.id} className="rounded-[var(--lm-radius-card)] border border-line bg-white">
+                  <div className="flex items-start justify-between gap-3 px-4 py-3">
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <p className="text-[13px] font-semibold tracking-wide text-ink">
-                          {order.order_number}
-                        </p>
-                        <span
-                          className={cn(
-                            "rounded-full border px-2.5 py-0.5 text-[10px] font-medium",
-                            meta.tone,
-                          )}
-                        >
-                          {meta.label}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[14px] font-semibold leading-5 text-ink">{order.order_number}</p>
+                        <span className={cn("rounded-[var(--lm-radius-tag)] border px-1.5 py-0.5 text-[12px] leading-4", meta.tone)}>
+                          {order.status === "packed" ? "Confirmed" : meta.label}
                         </span>
                       </div>
-                      <p className="mt-1 text-[11px] text-ink-soft">
-                        Placed {formatDateTime(order.created_at)} · {order.order_items?.length ?? 0} item
-                        {(order.order_items?.length ?? 0) === 1 ? "" : "s"}
+                      <p className="mt-0.5 text-[12px] leading-4 text-ink-soft">
+                        {formatDateTime(order.created_at)} · {itemCount} item{itemCount === 1 ? "" : "s"}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="price text-base font-semibold text-ink">{inr(order.total)}</p>
-                      <p className="mt-0.5 flex items-center justify-end gap-1 text-[10.5px] text-ink-soft">
-                        <Banknote className="size-3" /> Cash on delivery
+                      <p className="price text-[16px] font-semibold leading-5 text-ink">{inr(order.total)}</p>
+                      <p className="mt-0.5 flex items-center justify-end gap-1 text-[12px] leading-4 text-ink-soft">
+                        <Banknote className="size-3.5" aria-hidden="true" /> Cash on delivery
                       </p>
                     </div>
                   </div>
 
-                  <div className="px-5 py-4 sm:px-6">
+                  <div className="px-4 pb-3">
                     <div className="flex flex-wrap gap-2">
-                      {(order.order_items ?? []).map((item) => (
-                        <div
+                      {(order.order_items ?? []).slice(0, 4).map((item) => (
+                        <span
                           key={item.id}
-                          className="flex items-center gap-2 rounded-full border border-line bg-cream/50 py-1 pl-1 pr-3"
+                          className="flex items-center gap-1.5 rounded-[var(--lm-radius-control)] border border-line px-1.5 py-1 text-[12px] leading-4 text-ink"
                         >
-                          <div className="relative size-8 shrink-0 overflow-hidden rounded-full bg-cream-2">
-                            <ProductImage
-                              src={item.image_url}
-                              alt={item.name}
-                              className="size-full object-cover"
-                            />
-                          </div>
-                          <span className="max-w-[9rem] truncate text-[11px] text-ink">
-                            {item.name}
+                          <span className="relative size-6 shrink-0 overflow-hidden rounded bg-white">
+                            <ProductImage src={item.image_url} alt={item.name} className="size-full object-contain" />
                           </span>
-                          <span className="text-[10px] text-ink-soft">×{item.quantity}</span>
-                        </div>
+                          <span className="max-w-[8rem] truncate">{item.name}</span>
+                          <span className="text-ink-soft">x{item.quantity}</span>
+                        </span>
                       ))}
+                      {itemCount > 4 && (
+                        <span className="self-center text-[12px] leading-4 text-ink-soft">+{itemCount - 4} more</span>
+                      )}
                     </div>
 
-                    <StatusTimeline status={order.status} />
+                    <div className="mt-3">
+                      <StatusTimeline
+                        status={order.status}
+                        placedAt={order.created_at}
+                        updatedAt={order.updated_at}
+                      />
+                    </div>
 
-                    <div className="mt-4 flex flex-wrap items-start justify-between gap-3 border-t border-line pt-4">
-                      <p className="flex max-w-md items-start gap-1.5 text-[11px] leading-relaxed text-ink-soft">
-                        <MapPin className="mt-0.5 size-3.5 shrink-0 text-forest" />
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+                      <p className="flex max-w-md items-start gap-1.5 text-[12px] leading-4 text-ink-soft">
+                        <MapPin className="mt-0.5 size-3.5 shrink-0 text-forest" aria-hidden="true" />
                         {order.address}
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => reorder(order)}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        <RotateCcw className="size-3.5" />
-                        Order again
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setExpanded(isOpen ? null : order.id)}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          {isOpen ? "Hide details" : "View details"}
+                        </button>
+                        <Button size="sm" onClick={() => reorder(order)} iconLeft={<RotateCcw className="size-3.5" />}>
+                          Order again
+                        </Button>
+                      </div>
                     </div>
 
-                    {(order.discount > 0 || order.delivery_fee > 0) && (
-                      <p className="mt-3 text-[10.5px] text-ink-soft">
-                        Subtotal {inr(order.subtotal)}
-                        {order.discount > 0 && ` · coupon −${inr(order.discount)}`}
-                        {order.delivery_fee > 0 ? ` · delivery ${inr(order.delivery_fee)}` : " · free delivery"}
-                      </p>
+                    {isOpen && (
+                      <div className="mt-3 rounded-[var(--lm-radius-control)] bg-cream-2/60 px-3 py-2 text-[12px] leading-4 text-ink-soft">
+                        <ul className="space-y-1">
+                          {(order.order_items ?? []).map((item) => (
+                            <li key={item.id} className="flex justify-between gap-3">
+                              <span className="truncate">
+                                {item.quantity} x {item.name}
+                              </span>
+                              <span className="price shrink-0 text-ink">{inr(item.price * item.quantity)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-2 border-t border-line pt-2">
+                          <p className="flex justify-between">
+                            <span>Subtotal</span>
+                            <span className="price">{inr(order.subtotal)}</span>
+                          </p>
+                          {order.discount > 0 && (
+                            <p className="flex justify-between">
+                              <span>Coupon {order.coupon_code ?? ""}</span>
+                              <span className="price">-{inr(order.discount)}</span>
+                            </p>
+                          )}
+                          <p className="flex justify-between">
+                            <span>Delivery</span>
+                            <span className="price">
+                              {order.delivery_fee === 0 ? "Free" : inr(order.delivery_fee)}
+                            </span>
+                          </p>
+                          <p className="mt-1 flex justify-between text-[14px] font-semibold text-ink">
+                            <span>Total</span>
+                            <span className="price">{inr(order.total)}</span>
+                          </p>
+                          {order.delivery_slot && (
+                            <p className="mt-1">Delivery slot: {order.delivery_slot}</p>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </article>

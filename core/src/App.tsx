@@ -19,7 +19,7 @@ import { Account } from "./pages/Account";
 import { Offers } from "./pages/Offers";
 import { LoginPage, SignupPage } from "./pages/Auth";
 import { NotFound } from "./pages/NotFound";
-import { Maintenance, PrivacyPolicy, TermsOfService } from "./pages/Legal";
+import { Maintenance, PrivacyPolicy, RefundAndCancellation, TermsOfService } from "./pages/Legal";
 import { AdminLayout } from "./pages/admin/AdminLayout";
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
 const AdminProducts = lazy(() => import("./pages/admin/AdminProducts").then((m) => ({ default: m.AdminProducts })));
@@ -127,6 +127,7 @@ export function App() {
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
                   <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/refunds" element={<RefundAndCancellation />} />
                   <Route path="/maintenance" element={<Maintenance />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
