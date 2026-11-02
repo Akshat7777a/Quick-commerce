@@ -113,3 +113,46 @@ built.
   needs owner verification in the database.
 - **Service worker behaviour** (`M-06`): `sw.js` skipWaiting/clients.claim
   audit deferred to Phase C.
+
+## Phase D audit (Supabase live data-access; no code change)
+
+The migrations in `supabase/migrations/` declare the intended policy model;
+this phase verified by probing the **live** database that the model actually
+holds, using the public anon key and the shipped test account, plus a one-off
+throwaway signup. Probes were booby-trapped (incomplete bodies, zero-match
+filters, invalid MIME) so no real data could be created or changed.
+
+- **RLS is enforced live.** Anon and customer INSERTs into `products` return a
+  proper `42501` row-level-security violation; anon reads of `orders` and
+  `profiles` return nothing; `admin_customers()` answers "Admin access
+  required."; a non-admin image upload to the `product-images` bucket is
+  rejected by RLS (and non-image MIME is rejected by the bucket itself).
+- **Profile auto-create is live.** A throwaway signup instantly got a
+  `profiles` row with `role = 'customer'` (`handle_new_user` trigger works).
+- **Self-escalation to admin is blocked, verified by behavior.** The probe
+  account PATCHed its own profile to `role = 'admin'`; PostgREST reported the
+  row as written, but the `guard_profile_role` trigger silently kept the old
+  `customer` value (read-back confirms). The README's security claim holds on
+  the live DB.
+- **No secrets exposure.** Only the anon key ships with the client; no
+  service-role key appears anywhere in `core/src` or scripts.
+- **Drift observations (owner, low priority):**
+  1. An anonymous caller can *invoke* the `place_order` RPC (expected:
+     "permission denied"); it fails harmlessly at the sign-in guard, but the
+     least-privilege revoke on the function is not effective on the live DB.
+     Re-run `revoke all on function public.place_order ... from public` in the
+     SQL editor as defense in depth.
+  2. The test account (`lmart.store.test@gmail.com`, uid
+     `7fae7815-39f8-406f-a0f6-5846478803fd`) has an auth user but **no
+     `profiles` row** (even its own `select own` returns nothing). It was
+     likely created before the auto-create trigger went live. This fully
+     explains M-09: `is_admin()` reads the profile row, so promoting this
+     account to admin also requires inserting its missing profile row.
+- **Signup auto-confirm is enabled** (instant session, no email
+  verification). Acceptable for a neighbourhood store, but the owner should
+  know anyone can create disposable accounts.
+- **Cleanup note:** one throwaway probe account was created during this audit:
+  uid `5f44bb85-3dba-4146-a9d7-a99972db576f`,
+  email `lmart.probe.1793649236@gmail.com` (also recorded in
+  `.internal/probe-account.txt`). Its role was never changed from `customer`.
+  The owner can delete it in Supabase → Auth if desired.
