@@ -86,7 +86,7 @@ export function Account() {
         </div>
       )}
 
-      <div className="mt-8 grid gap-6 pb-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mt-8 grid grid-cols-1 gap-6 pb-8 lg:grid-cols-[1.1fr_0.9fr]">
         <form onSubmit={save} className="card p-5 sm:p-7">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-2xl text-ink">Your details</h2>

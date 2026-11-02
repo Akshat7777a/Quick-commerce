@@ -4,6 +4,24 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { cn } from "../lib/format";
 import type { Banner } from "../lib/types";
 
+// Banner images are served from Unsplash's image CDN, which honours resize
+// params. The DB stores w=1600&q=80 (fine for desktop); on a 360px-wide phone
+// that overscan delays the home LCP element by seconds on Slow 4G. Only
+// Unsplash URLs are rewritten; Supabase/other hosts pass through untouched.
+function bannerSrc(url: string, eager: boolean): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "images.unsplash.com") return url;
+    if (eager) {
+      parsed.searchParams.set("w", "800");
+      parsed.searchParams.set("q", "75");
+    }
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 const tones = {
   forest: {
     wrapper: "bg-forest text-cream",
@@ -47,7 +65,7 @@ const tones = {
   },
 } as const;
 
-export function BannerCarousel({ banners }: { banners: Banner[] }) {
+export function BannerCarousel({ banners, loading = false }: { banners: Banner[]; loading?: boolean }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const total = banners.length;
@@ -63,6 +81,17 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
   useEffect(() => {
     if (index > total - 1) setIndex(0);
   }, [index, total]);
+
+  // Reserve the hero's height while first paint is waiting on the banners
+  // request: without this the whole page jumps down by ~26rem once they land
+  // (measured CLS 0.438 on a cold Slow-4G load).
+  if (total === 0 && loading) {
+    return (
+      <section className="container-page pt-5 sm:pt-8" aria-hidden="true">
+        <div className="min-h-[26rem] rounded-[1.5rem] bg-cream-2 animate-pulse shadow-soft sm:min-h-[30rem] sm:rounded-[2rem]" />
+      </section>
+    );
+  }
 
   if (total === 0) return null;
 
@@ -90,10 +119,12 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
             >
               {banner.image_url && (
                 <img
-                  src={banner.image_url}
+                  src={bannerSrc(banner.image_url, slide === 0)}
                   alt=""
                   className="absolute inset-0 size-full object-cover"
                   loading={slide === 0 ? "eager" : "lazy"}
+                  fetchPriority={slide === 0 ? "high" : undefined}
+                  decoding="async"
                 />
               )}
               <div className={cn("absolute inset-0", tone.overlay)} />

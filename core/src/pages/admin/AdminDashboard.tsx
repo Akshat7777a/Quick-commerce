@@ -117,7 +117,7 @@ export function AdminDashboard() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-[1.35rem] border border-line bg-card p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -193,7 +193,7 @@ export function AdminDashboard() {
         </section>
       </div>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[1.25fr_0.75fr]">
         <section className="overflow-hidden rounded-[1.35rem] border border-line bg-card">
           <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
             <h2 className="text-xl text-ink">Recent orders</h2>

@@ -340,7 +340,7 @@ export function Checkout() {
         </p>
       </div>
 
-      <form onSubmit={submit} className="mt-8 grid gap-8 pb-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+      <form onSubmit={submit} className="mt-8 grid grid-cols-1 gap-8 pb-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
         <div className="space-y-6">
           <section className="card p-5 sm:p-6">
             <div className="flex items-center gap-2.5">

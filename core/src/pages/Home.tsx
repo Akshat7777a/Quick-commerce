@@ -77,25 +77,19 @@ export function Home() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([
-      api.listBanners(),
-      api.listCategories(),
-      api.listProducts({ featured: true, limit: 8 }),
-      api.listProducts({ limit: 8, sort: "featured" }),
-      api.listCoupons(),
-    ])
-      .then(([bannerRows, categoryRows, featuredRows, shelfRows, couponRows]) => {
-        if (!alive) return;
-        setBanners(bannerRows);
-        setCategories(categoryRows);
-        setFeatured(featuredRows);
-        setShelf(shelfRows);
-        setCoupons(couponRows.slice(0, 3));
-      })
-      .catch(() => undefined)
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
+    // Each section renders as soon as its own request lands. Gating the banner
+    // on the slowest of five requests delayed the LCP image by ~2s+ on Slow 4G.
+    const jobs: Promise<unknown>[] = [];
+    const run = (p: Promise<unknown>, set: (value: unknown) => void) =>
+      jobs.push(p.then((value) => { if (alive) set(value); }).catch(() => undefined));
+    run(api.listBanners(), setBanners as (value: unknown) => void);
+    run(api.listCategories(), setCategories as (value: unknown) => void);
+    run(api.listProducts({ featured: true, limit: 8 }), setFeatured as (value: unknown) => void);
+    run(api.listProducts({ limit: 8, sort: "featured" }), setShelf as (value: unknown) => void);
+    run(api.listCoupons(), (value) => { if (alive) setCoupons((value as Coupon[]).slice(0, 3)); });
+    Promise.all(jobs).finally(() => {
+      if (alive) setLoading(false);
+    });
     return () => {
       alive = false;
     };
@@ -105,7 +99,7 @@ export function Home() {
     <div>
       {/* Optional patch content above everything (campaign ribbon, notice). */}
       <PatchSlot name="home-top" />
-      <BannerCarousel banners={banners} />
+      <BannerCarousel banners={banners} loading={loading} />
 
       {/* Trust strip */}
       <section className="container-page mt-6 sm:mt-8">
@@ -151,7 +145,7 @@ export function Home() {
                   {category.image_url ? (
                     <img
                       src={category.image_url}
-                      alt={category.name}
+                      alt=""
                       loading="lazy"
                       className="absolute inset-0 size-full object-cover transition duration-200 group-hover:scale-105"
                     />
@@ -222,7 +216,7 @@ export function Home() {
 
       {/* How it works */}
       <section className="container-page mt-16 sm:mt-24">
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <div>
             <p className="eyebrow">How to order</p>
             <h2 className="mt-2 text-balance text-4xl leading-[1.02] text-ink sm:text-5xl">

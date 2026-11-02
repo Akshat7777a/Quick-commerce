@@ -157,7 +157,7 @@ export function AdminLayout() {
         </div>
       </header>
 
-      <div className="container-page grid gap-8 py-6 lg:grid-cols-[13rem_1fr] lg:py-8">
+      <div className="container-page grid grid-cols-1 gap-8 py-6 lg:grid-cols-[13rem_1fr] lg:py-8">
         <aside className="hidden lg:block">
           <nav className="sticky top-24 space-y-0.5" aria-label="Admin sections">
             {nav.map((item) => (

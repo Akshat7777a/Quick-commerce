@@ -62,6 +62,28 @@ export function errorMessage(error: unknown, fallback = "Something went wrong. P
 
 const cleanSearch = (value: string) => value.trim().replace(/[%,()*]/g, "");
 
+/**
+ * Categories are small and read on every storefront page. One fetch per page
+ * load is all a slow connection needs: the first caller shares its promise
+ * with everyone else, and any admin category write clears the pool.
+ */
+let categoryRequest: Promise<Category[]> | null = null;
+function sharedCategories(): Promise<Category[]> | null {
+  if (categoryRequest) return categoryRequest;
+  categoryRequest = (async () => unwrap(await supabase
+    .from("categories")
+    .select("*")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true })) as Category[])();
+  categoryRequest.catch(() => {
+    categoryRequest = null; // failed fetch stays unfetched: the retry path is untouched
+  });
+  return categoryRequest;
+}
+function forgetCategories() {
+  categoryRequest = null;
+}
+
 export type ProductQuery = {
   search?: string;
   categoryId?: string | null;
@@ -75,14 +97,7 @@ export const api = {
   /* ---------------------------------------------------------------- catalogue */
   listCategories(): Promise<Category[]> {
     return run(
-      async () =>
-        unwrap(
-          await supabase
-            .from("categories")
-            .select("*")
-            .eq("is_active", true)
-            .order("sort_order", { ascending: true }),
-        ) as Category[],
+      async () => (await sharedCategories()) as Category[],
       () => demo.listCategories(),
     );
   },
@@ -275,9 +290,14 @@ export const api = {
         const response = input.id
           ? await supabase.from("categories").update(payload).eq("id", input.id).select().single()
           : await supabase.from("categories").insert(payload).select().single();
-        return unwrap(response) as Category;
+        const saved = unwrap(response) as Category;
+        forgetCategories();
+        return saved;
       },
-      () => demo.saveCategory(input),
+      () => {
+        forgetCategories();
+        return demo.saveCategory(input);
+      },
     );
   },
 
@@ -286,8 +306,12 @@ export const api = {
       async () => {
         const { error } = await supabase.from("categories").delete().eq("id", id);
         if (error) throw error;
+        forgetCategories();
       },
-      () => demo.deleteCategory(id),
+      () => {
+        forgetCategories();
+        return demo.deleteCategory(id);
+      },
     );
   },
 
