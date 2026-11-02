@@ -1,22 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  Banknote,
-  Clock3,
-  MapPin,
-  ShoppingBasket,
-  Truck,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { api } from "../lib/api";
-import { useStoreSettings } from "../lib/store";
-import { inr } from "../lib/format";
 import { BannerCarousel } from "../components/BannerCarousel";
 import { CouponCard } from "../components/CouponCard";
 import { ProductCard } from "../components/ProductCard";
 import { ProductGridSkeleton } from "../components/ui";
 import { PatchSlot } from "../lib/patch-loader";
-import type { Banner, Category, Coupon, Product } from "../lib/types";
+import type { Banner, Coupon, Product } from "../lib/types";
 
 function SectionHead({
   eyebrow,
@@ -48,28 +39,8 @@ function SectionHead({
   );
 }
 
-const steps = [
-  {
-    number: "01",
-    title: "Fill your basket",
-    copy: "Browse the aisles, check what's fresh today, and add what you need.",
-  },
-  {
-    number: "02",
-    title: "Confirm your order",
-    copy: "Add your delivery address and choose a delivery time.",
-  },
-  {
-    number: "03",
-    title: "Pay at your door",
-    copy: "We pack it, deliver it, and you hand over cash on arrival.",
-  },
-];
-
 export function Home() {
-  const { settings } = useStoreSettings();
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [featured, setFeatured] = useState<Product[]>([]);
   const [shelf, setShelf] = useState<Product[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -83,7 +54,6 @@ export function Home() {
     const run = (p: Promise<unknown>, set: (value: unknown) => void) =>
       jobs.push(p.then((value) => { if (alive) set(value); }).catch(() => undefined));
     run(api.listBanners(), setBanners as (value: unknown) => void);
-    run(api.listCategories(), setCategories as (value: unknown) => void);
     run(api.listProducts({ featured: true, limit: 8 }), setFeatured as (value: unknown) => void);
     run(api.listProducts({ limit: 8, sort: "featured" }), setShelf as (value: unknown) => void);
     run(api.listCoupons(), (value) => { if (alive) setCoupons((value as Coupon[]).slice(0, 3)); });
@@ -101,86 +71,26 @@ export function Home() {
       <PatchSlot name="home-top" />
       <BannerCarousel banners={banners} loading={loading} />
 
-      {/* Trust strip */}
-      <section className="container-page mt-6 sm:mt-8">
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4">
-          {[
-            { icon: Banknote, title: "Cash on delivery", copy: "Pay when it arrives" },
-            { icon: Truck, title: `Free over ${inr(settings.free_delivery_above)}`, copy: "Above the order threshold" },
-            { icon: Clock3, title: "Delivery times", copy: "Choose a slot at checkout" },
-            { icon: MapPin, title: "Delivery area", copy: "Check your PIN at checkout" },
-          ].map((item) => (
-            <div key={item.title} className="flex items-center gap-3 bg-cream px-4 py-4 sm:px-6">
-              <item.icon className="size-4 shrink-0 text-forest" strokeWidth={1.6} />
-              <div className="min-w-0">
-                <p className="text-[14px] font-medium leading-snug text-ink sm:text-[12px]">
-                  {item.title}
-                </p>
-                <p className="text-[14px] leading-snug text-ink-soft sm:text-[10.5px]">{item.copy}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="container-page mt-14 sm:mt-20">
-        <SectionHead
-          eyebrow="Shop the aisles"
-          title="Everything, well organised"
-          action="/shop"
-          actionLabel="Browse all"
-        />
-        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2 no-scrollbar sm:mx-0 sm:grid sm:grid-cols-4 sm:px-0 lg:grid-cols-8">
-          {loading
-            ? Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="aspect-[3/4] w-28 shrink-0 animate-pulse rounded-[1.1rem] bg-cream-2 sm:w-auto" />
-              ))
-            : categories.map((category) => (
-                <Link
-                  key={category.id}
-                  to={`/shop?category=${category.slug}`}
-                  className="group relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-[1.1rem] bg-cream-2 sm:w-auto"
-                >
-                  {category.image_url ? (
-                    <img
-                      src={category.image_url}
-                      alt=""
-                      loading="lazy"
-                      className="absolute inset-0 size-full object-cover transition duration-200 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 grid place-items-center bg-cream-2 text-ink-soft">
-                      <ShoppingBasket className="size-6" strokeWidth={1.4} />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-2.5">
-                    <p className="text-[14px] font-medium leading-tight text-cream">{category.name}</p>
-                  </div>
-                </Link>
-              ))}
-        </div>
-      </section>
-
       {/* Featured */}
-      <section className="container-page mt-14 sm:mt-20">
-        <SectionHead
-          eyebrow="Featured products"
-          title="Featured in the shop"
-          action="/shop?sort=featured"
-          actionLabel="See all featured products"
-        />
-        {loading ? (
-          <ProductGridSkeleton count={4} />
-        ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-5 md:grid-cols-3 xl:grid-cols-4">
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </section>
+      {(loading || featured.length > 0) && (
+        <section className="container-page mt-14 sm:mt-20">
+          <SectionHead
+            eyebrow="Featured products"
+            title="Featured in the shop"
+            action="/shop?sort=featured"
+            actionLabel="See all featured products"
+          />
+          {loading ? (
+            <ProductGridSkeleton count={4} />
+          ) : (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-5 md:grid-cols-3 xl:grid-cols-4">
+              {featured.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Offers */}
       {coupons.length > 0 && (
@@ -214,43 +124,20 @@ export function Home() {
         </section>
       )}
 
-      {/* How it works */}
+      {/* Explore the shop */}
       <section className="container-page mt-16 sm:mt-24">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
-          <div>
-            <p className="eyebrow">How to order</p>
-            <h2 className="mt-2 text-balance text-4xl leading-[1.02] text-ink sm:text-5xl">
-              Groceries and everyday essentials.
-            </h2>
-            <p className="mt-5 max-w-md text-[13.5px] leading-relaxed text-ink-soft">
-              Browse the products, add your delivery address, and choose a delivery time. Cash on
-              delivery is available.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-[11.5px] text-ink-soft">
-              <span className="inline-flex items-center gap-2">
-                <MapPin className="size-3.5 text-forest" /> Delivery area shown at checkout
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Clock3 className="size-3.5 text-forest" /> Delivery times shown at checkout
-              </span>
-            </div>
-            <Link to="/shop" className="btn btn-secondary mt-8">
-              Explore the shop
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-
-          <ol className="divide-y divide-line border-t border-line">
-            {steps.map((step) => (
-              <li key={step.number} className="flex gap-5 py-6 sm:gap-8 sm:py-7">
-                <span className="font-display text-2xl text-gold sm:text-3xl">{step.number}</span>
-                <div>
-                  <h3 className="text-xl text-ink sm:text-[1.4rem]">{step.title}</h3>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">{step.copy}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+        <div className="flex flex-col items-center gap-3 rounded-[1.5rem] border border-line bg-cream-2/60 px-5 py-10 text-center sm:rounded-[2rem] sm:py-12">
+          <p className="eyebrow">Everyday essentials</p>
+          <h2 className="text-balance text-3xl leading-tight text-ink sm:text-4xl">
+            Browse the whole shop
+          </h2>
+          <p className="max-w-md text-[13.5px] leading-relaxed text-ink-soft">
+            Groceries and everyday essentials, packed fresh and delivered to your door.
+          </p>
+          <Link to="/shop" className="btn btn-secondary mt-2">
+            Explore the shop
+            <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
 

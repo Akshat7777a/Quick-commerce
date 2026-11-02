@@ -156,3 +156,34 @@ filters, invalid MIME) so no real data could be created or changed.
   email `lmart.probe.1793649236@gmail.com` (also recorded in
   `.internal/probe-account.txt`). Its role was never changed from `customer`.
   The owner can delete it in Supabase → Auth if desired.
+
+## Home page simplification (owner-directed)
+
+Owner reviewed the local preview and asked for a leaner, flatter home page.
+Changes, all in `core/src/pages/Home.tsx` and
+`core/src/components/BannerCarousel.tsx`, preserving the visual identity:
+
+- **Shorter banner poster.** Slide height reduced from 26/30/32rem to
+  17/21/24rem (mobile measured 272 px vs ~416 px before; desktop 384 px), the
+  poster heading scale reduced a step, skeleton matches the new height, CTA
+  button one step smaller. Same image, same tones, same autoplay/dots.
+- **Trust strip removed.** The four-pillar band ("Cash on delivery / Free
+  over 499 / Delivery times / Delivery area") is gone from the home page.
+  Details still live where they matter (checkout, shop, footer).
+- **"Shop the aisles" category rail removed.** Redundant with the Shop tab,
+  which already shows all categories. This also drops the per-home
+  `listCategories` request.
+- **"How to order" section removed** (heading, copy, and the
+  Fill basket / Confirm order / Pay at the door step list). The CTA the owner
+  wanted to keep ("Explore the shop") becomes a quiet centered band between
+  the featured strip and the full shelf.
+- **Featured section auto-hides** when the DB has no `is_featured` products
+  (true at audit time; live DB returned no flagged products), so the page
+  never shows an empty band. It reappears as soon as products are flagged in
+  the admin panel.
+
+Home sections are now, top to bottom: poster, (featured when flagged),
+explore band, full shelf (+ mobile "Browse all products"). Main chunk shrank
+slightly: 188.2 KB to 187.5 KB gzip. Verified at 360x800 and 1280x800 in the
+preview: no console errors, no horizontal overflow, featured/full-shelf grids
+render.

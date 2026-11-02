@@ -88,7 +88,7 @@ export function BannerCarousel({ banners, loading = false }: { banners: Banner[]
   if (total === 0 && loading) {
     return (
       <section className="container-page pt-5 sm:pt-8" aria-hidden="true">
-        <div className="min-h-[26rem] rounded-[1.5rem] bg-cream-2 animate-pulse shadow-soft sm:min-h-[30rem] sm:rounded-[2rem]" />
+        <div className="min-h-[17rem] rounded-[1.5rem] bg-cream-2 animate-pulse shadow-soft sm:min-h-[21rem] sm:rounded-[2rem] lg:min-h-[24rem]" />
       </section>
     );
   }
@@ -128,14 +128,14 @@ export function BannerCarousel({ banners, loading = false }: { banners: Banner[]
                 />
               )}
               <div className={cn("absolute inset-0", tone.overlay)} />
-              <div className="relative flex min-h-[26rem] flex-col justify-end p-6 sm:min-h-[30rem] sm:p-12 lg:min-h-[32rem]">
+              <div className="relative flex min-h-[17rem] flex-col justify-end p-5 sm:min-h-[21rem] sm:p-10 lg:min-h-[24rem]">
                 <div className="max-w-xl">
                   {banner.eyebrow && (
                     <p className={cn("text-[10px] font-medium uppercase tracking-[0.28em]", tone.eyebrow)}>
                       {banner.eyebrow}
                     </p>
                   )}
-                  <h2 className="mt-3 text-balance text-[2.5rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
+                  <h2 className="mt-3 text-balance text-[1.9rem] leading-[1.0] sm:text-4xl lg:text-5xl">
                     {banner.title}
                   </h2>
                   {banner.subtitle && (
@@ -146,7 +146,7 @@ export function BannerCarousel({ banners, loading = false }: { banners: Banner[]
                   <Link
                     to={banner.cta_link ?? "/shop"}
                     className={cn(
-                      "btn mt-7 h-11 gap-2 px-5 text-[13px] transition",
+                      "btn mt-5 h-10 gap-2 px-5 text-[13px] transition",
                       tone.button,
                     )}
                   >
