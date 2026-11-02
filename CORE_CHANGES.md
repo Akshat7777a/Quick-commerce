@@ -193,3 +193,15 @@ shop" band added above is also removed. The home page is now just the poster,
 the Featured strip (only when products are flagged), and the full shelf with
 its mobile "Browse all products" button. The Shop tab and every section
 heading already link nowhere else a CTA band needed to point.
+
+## Bottom navigation bar (owner-directed)
+
+Owner asked for a slim bar at the bottom carrying the main options. The
+existing mobile-only nav (Home, Shop, Offers, Orders, Account) became a
+compact 4-item bar shown at every width: Home, Shop, Categories, Account,
+with smaller icons and labels so it reads as a utility strip, not a banner.
+StoreLayout's bottom padding is now unconditional so the bar never covers
+content. A real Categories page (`core/src/pages/Categories.tsx`,
+route `/categories`) was added so the tab has a destination: a simple grid of
+category cards linking into `/shop?category=...`, same visual language as the
+old home rail.

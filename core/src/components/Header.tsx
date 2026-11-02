@@ -5,6 +5,7 @@ import {
   LayoutGrid,
   Moon,
   Search,
+  Shapes,
   ShoppingBag,
   Sun,
   Tag,
@@ -235,8 +236,7 @@ export function Header() {
 const mobileTabs = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/shop", label: "Shop", icon: LayoutGrid, end: false },
-  { to: "/offers", label: "Offers", icon: Tag, end: false },
-  { to: "/orders", label: "Orders", icon: ShoppingBag, end: false },
+  { to: "/categories", label: "Categories", icon: Shapes, end: false },
   { to: "/account", label: "Account", icon: User, end: false },
 ];
 
@@ -244,9 +244,9 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-cream safe-bottom md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-cream safe-bottom"
     >
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-4">
         {mobileTabs.map((tab) => (
           <NavLink
             key={tab.to}
@@ -254,12 +254,12 @@ export function MobileNav() {
             end={tab.end}
             className={({ isActive }) =>
               cn(
-                "flex min-h-11 flex-col items-center justify-center gap-1 py-1 text-[11px] tracking-wide transition",
+                "flex min-h-11 flex-col items-center justify-center gap-0.5 py-1 text-[10.5px] tracking-wide transition",
                 isActive ? "text-forest" : "text-ink-soft",
               )
             }
           >
-            <tab.icon className="size-[18px]" strokeWidth={1.7} aria-hidden="true" />
+            <tab.icon className="size-4" strokeWidth={1.7} aria-hidden="true" />
             {tab.label}
           </NavLink>
         ))}
