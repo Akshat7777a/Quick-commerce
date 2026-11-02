@@ -10,6 +10,7 @@ import { StoreLayout } from "./components/StoreLayout";
 import { Home } from "./pages/Home";
 import { Shop } from "./pages/Shop";
 import { Categories } from "./pages/Categories";
+const DesignSystem = lazy(() => import("./pages/DesignSystem").then((m) => ({ default: m.DesignSystem })));
 import { ProductPage } from "./pages/ProductPage";
 import { Checkout } from "./pages/Checkout";
 import { Orders } from "./pages/Orders";
@@ -114,6 +115,7 @@ export function App() {
                   <Route index element={<Home />} />
                   <Route path="/shop" element={<Shop />} />
                   <Route path="/categories" element={<Categories />} />
+                  <Route path="/design-system" element={<Suspense fallback={null}><DesignSystem /></Suspense>} />
                   <Route path="/product/:slug" element={<ProductPage />} />
                   <Route path="/offers" element={<Offers />} />
                   <Route path="/checkout" element={<Checkout />} />
