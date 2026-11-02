@@ -187,3 +187,9 @@ explore band, full shelf (+ mobile "Browse all products"). Main chunk shrank
 slightly: 188.2 KB to 187.5 KB gzip. Verified at 360x800 and 1280x800 in the
 preview: no console errors, no horizontal overflow, featured/full-shelf grids
 render.
+
+Follow-up (same owner review): the "Everyday essentials / Browse the whole
+shop" band added above is also removed. The home page is now just the poster,
+the Featured strip (only when products are flagged), and the full shelf with
+its mobile "Browse all products" button. The Shop tab and every section
+heading already link nowhere else a CTA band needed to point.

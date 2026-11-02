@@ -124,23 +124,6 @@ export function Home() {
         </section>
       )}
 
-      {/* Explore the shop */}
-      <section className="container-page mt-16 sm:mt-24">
-        <div className="flex flex-col items-center gap-3 rounded-[1.5rem] border border-line bg-cream-2/60 px-5 py-10 text-center sm:rounded-[2rem] sm:py-12">
-          <p className="eyebrow">Everyday essentials</p>
-          <h2 className="text-balance text-3xl leading-tight text-ink sm:text-4xl">
-            Browse the whole shop
-          </h2>
-          <p className="max-w-md text-[13.5px] leading-relaxed text-ink-soft">
-            Groceries and everyday essentials, packed fresh and delivered to your door.
-          </p>
-          <Link to="/shop" className="btn btn-secondary mt-2">
-            Explore the shop
-            <ArrowRight className="size-4" />
-          </Link>
-        </div>
-      </section>
-
       {/* Full shelf */}
       <section className="container-page mt-16 sm:mt-24">
         <SectionHead
