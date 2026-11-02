@@ -12,3 +12,5 @@ freebuff-sites-build/
 *.db
 *.db-wal
 *.db-journal
+.internal/
+.cloud-attachments/

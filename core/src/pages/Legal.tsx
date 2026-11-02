@@ -252,3 +252,51 @@ export function Maintenance() {
     </div>
   );
 }
+
+export function RefundAndCancellation() {
+  const contact = useContactLine();
+
+  return (
+    <LegalShell eyebrow="Legal" title="Refund and Cancellation" updated="[Owner should set the date]">
+      <p>
+        This page explains what happens if an order goes wrong. We are a single shop, so most issues
+        are settled with one phone call.
+      </p>
+
+      <Section heading="Cancelling an order">
+        <p>
+          Call the shop before your delivery slot and we will cancel the order at no cost. If the
+          order is already out for delivery, you can refuse it at the door and pay nothing.
+        </p>
+      </Section>
+
+      <Section heading="Wrong, missing or damaged items">
+        <p>
+          Tell the delivery person or call the shop on the same day. We will replace the item, remove
+          it from the bill, or refund it on your next order. Nothing here limits your rights under
+          Indian law.
+        </p>
+      </Section>
+
+      <Section heading="Refunds">
+        <p>
+          Payment is cash on delivery, so refunds are given in cash or as a credit on your next
+          order, whichever you prefer. Please allow until the next working day for a cash refund to
+          be arranged.
+        </p>
+      </Section>
+
+      <Section heading="Orders we cannot fulfil">
+        <p>
+          If an item is out of stock when we pack, we call you before packing when it changes the
+          order meaningfully. If you cannot be reached, the item is left out and you pay less. We
+          never bill you for something we did not deliver.
+        </p>
+      </Section>
+
+      <Section heading="Contact">
+        <p>{contact}</p>
+      </Section>
+    </LegalShell>
+  );
+}

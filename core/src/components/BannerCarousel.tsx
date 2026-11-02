@@ -4,6 +4,22 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { cn } from "../lib/format";
 import type { Banner } from "../lib/types";
 
+// Banner images are served from Unsplash's image CDN, which honours resize
+// params. The DB stores w=1600&q=80 (fine for desktop); on a 360px-wide phone
+// that overscan delays the home LCP element by seconds on Slow 4G. Only
+// Unsplash URLs are rewritten; Supabase/other hosts pass through untouched.
+function bannerSrc(url: string, eager: boolean): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "images.unsplash.com") return url;
+    parsed.searchParams.set("w", eager ? "1200" : "800");
+    parsed.searchParams.set("q", "70");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 const tones = {
   forest: {
     wrapper: "bg-forest text-cream",
@@ -47,22 +63,34 @@ const tones = {
   },
 } as const;
 
-export function BannerCarousel({ banners }: { banners: Banner[] }) {
+export function BannerCarousel({ banners, loading = false }: { banners: Banner[]; loading?: boolean }) {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [wide, setWide] = useState(() =>
+    typeof window === "undefined" ? false : window.matchMedia("(min-width: 640px)").matches,
+  );
   const total = banners.length;
-
-  useEffect(() => {
-    if (total <= 1 || paused) return;
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % total);
-    }, 7000);
-    return () => window.clearInterval(timer);
-  }, [total, paused]);
 
   useEffect(() => {
     if (index > total - 1) setIndex(0);
   }, [index, total]);
+
+  // Reserve the hero's height while first paint is waiting on the banners
+  // request: without this the whole page jumps down by ~26rem once they land
+  // (measured CLS 0.438 on a cold Slow-4G load).
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 640px)");
+    const update = () => setWide(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  if (total === 0 && loading) {
+    return (
+      <section className="container-page pt-5 sm:pt-8" aria-hidden="true">
+        <div className="h-[17rem] rounded-[var(--lm-radius-card)] bg-cream-2 animate-pulse sm:h-[21rem] lg:h-[24rem]" />
+      </section>
+    );
+  }
 
   if (total === 0) return null;
 
@@ -72,8 +100,6 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
     <section className="container-page pt-5 sm:pt-8" aria-roledescription="carousel" aria-label="Featured offers">
       <div
         className="relative overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
       >
         {banners.map((banner, slide) => {
           const tone = tones[banner.tone] ?? tones.forest;
@@ -82,29 +108,32 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
             <div
               key={banner.id}
               aria-hidden={!active}
+              inert={!active}
               className={cn(
                 "transition-opacity duration-200",
                 active ? "relative opacity-100" : "pointer-events-none absolute inset-0 opacity-0",
                 tone.wrapper,
               )}
             >
-              {banner.image_url && (
+              {wide && banner.image_url && (
                 <img
-                  src={banner.image_url}
+                  src={bannerSrc(banner.image_url, slide === 0)}
                   alt=""
                   className="absolute inset-0 size-full object-cover"
                   loading={slide === 0 ? "eager" : "lazy"}
+                  fetchPriority={slide === 0 ? "high" : undefined}
+                  decoding="async"
                 />
               )}
               <div className={cn("absolute inset-0", tone.overlay)} />
-              <div className="relative flex min-h-[26rem] flex-col justify-end p-6 sm:min-h-[30rem] sm:p-12 lg:min-h-[32rem]">
+              <div className="relative flex h-[17rem] flex-col justify-end p-5 sm:h-[21rem] sm:p-10 lg:h-[24rem]">
                 <div className="max-w-xl">
                   {banner.eyebrow && (
                     <p className={cn("text-[10px] font-medium uppercase tracking-[0.28em]", tone.eyebrow)}>
                       {banner.eyebrow}
                     </p>
                   )}
-                  <h2 className="mt-3 text-balance text-[2.5rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
+                  <h2 className="mt-3 text-balance text-[1.9rem] leading-[1.0] sm:text-4xl lg:text-5xl">
                     {banner.title}
                   </h2>
                   {banner.subtitle && (
@@ -115,7 +144,7 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
                   <Link
                     to={banner.cta_link ?? "/shop"}
                     className={cn(
-                      "btn mt-7 h-11 gap-2 px-5 text-[13px] transition",
+                      "btn mt-5 h-10 gap-2 px-5 text-[13px] transition",
                       tone.button,
                     )}
                   >

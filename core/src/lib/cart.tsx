@@ -102,7 +102,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const deliveryFee = useMemo(() => {
     if (subtotal <= 0) return 0;
-    if (settings.free_delivery_above > 0 && subtotal >= settings.free_delivery_above) return 0;
+    // Mirrors the DB rule exactly (place_order(): subtotal >=
+    // coalesce(free_delivery_above, 0) => 0). No `> 0` guard: if the owner sets
+    // the threshold to 0, the server charges free delivery on every order.
+    if (subtotal >= settings.free_delivery_above) return 0;
     return settings.delivery_fee;
   }, [subtotal, settings.free_delivery_above, settings.delivery_fee]);
 

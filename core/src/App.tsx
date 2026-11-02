@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
@@ -8,6 +9,9 @@ import { readJSON, writeJSON, sessionStore } from "./lib/storage";
 import { StoreLayout } from "./components/StoreLayout";
 import { Home } from "./pages/Home";
 import { Shop } from "./pages/Shop";
+import { Categories } from "./pages/Categories";
+import { SearchPage } from "./pages/Search";
+const DesignSystem = lazy(() => import("./pages/DesignSystem").then((m) => ({ default: m.DesignSystem })));
 import { ProductPage } from "./pages/ProductPage";
 import { Checkout } from "./pages/Checkout";
 import { Orders } from "./pages/Orders";
@@ -15,17 +19,17 @@ import { Account } from "./pages/Account";
 import { Offers } from "./pages/Offers";
 import { LoginPage, SignupPage } from "./pages/Auth";
 import { NotFound } from "./pages/NotFound";
-import { Maintenance, PrivacyPolicy, TermsOfService } from "./pages/Legal";
+import { Maintenance, PrivacyPolicy, RefundAndCancellation, TermsOfService } from "./pages/Legal";
 import { AdminLayout } from "./pages/admin/AdminLayout";
-import { AdminDashboard } from "./pages/admin/AdminDashboard";
-import { AdminProducts } from "./pages/admin/AdminProducts";
-import { AdminOrders } from "./pages/admin/AdminOrders";
-import { AdminCustomers } from "./pages/admin/AdminCustomers";
-import { AdminCategories } from "./pages/admin/AdminCategories";
-import { AdminBanners } from "./pages/admin/AdminBanners";
-import { AdminCoupons } from "./pages/admin/AdminCoupons";
-import { AdminData } from "./pages/admin/AdminData";
-import { AdminSettings } from "./pages/admin/AdminSettings";
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts").then((m) => ({ default: m.AdminProducts })));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders").then((m) => ({ default: m.AdminOrders })));
+const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers").then((m) => ({ default: m.AdminCustomers })));
+const AdminCategories = lazy(() => import("./pages/admin/AdminCategories").then((m) => ({ default: m.AdminCategories })));
+const AdminBanners = lazy(() => import("./pages/admin/AdminBanners").then((m) => ({ default: m.AdminBanners })));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons").then((m) => ({ default: m.AdminCoupons })));
+const AdminData = lazy(() => import("./pages/admin/AdminData").then((m) => ({ default: m.AdminData })));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings").then((m) => ({ default: m.AdminSettings })));
 import { patchRoutes, PatchIsland } from "./lib/patch-loader";
 
 /**
@@ -76,6 +80,15 @@ function ScrollMemory() {
   return null;
 }
 
+/** Lazy admin pages resolve in a beat; a quiet spinner keeps the layout still. */
+function AdminSuspenseFallback() {
+  return (
+    <div className="flex justify-center py-24">
+      <div className="size-6 animate-spin rounded-full border-2 border-line border-t-forest" />
+    </div>
+  );
+}
+
 export function App() {
   return (
     <BrowserRouter>
@@ -102,6 +115,9 @@ export function App() {
                     ))}
                   <Route index element={<Home />} />
                   <Route path="/shop" element={<Shop />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/search" element={<SearchPage />} />
+                  <Route path="/design-system" element={<Suspense fallback={null}><DesignSystem /></Suspense>} />
                   <Route path="/product/:slug" element={<ProductPage />} />
                   <Route path="/offers" element={<Offers />} />
                   <Route path="/checkout" element={<Checkout />} />
@@ -111,20 +127,21 @@ export function App() {
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
                   <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/refunds" element={<RefundAndCancellation />} />
                   <Route path="/maintenance" element={<Maintenance />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
 
                 <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="customers" element={<AdminCustomers />} />
-                  <Route path="categories" element={<AdminCategories />} />
-                  <Route path="banners" element={<AdminBanners />} />
-                  <Route path="coupons" element={<AdminCoupons />} />
-                  <Route path="data" element={<AdminData />} />
-                  <Route path="settings" element={<AdminSettings />} />
+                  <Route index element={<Suspense fallback={<AdminSuspenseFallback />}><AdminDashboard /></Suspense>} />
+                  <Route path="products" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminProducts /></Suspense>} />
+                  <Route path="orders" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminOrders /></Suspense>} />
+                  <Route path="customers" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminCustomers /></Suspense>} />
+                  <Route path="categories" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminCategories /></Suspense>} />
+                  <Route path="banners" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminBanners /></Suspense>} />
+                  <Route path="coupons" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminCoupons /></Suspense>} />
+                  <Route path="data" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminData /></Suspense>} />
+                  <Route path="settings" element={<Suspense fallback={<AdminSuspenseFallback />}><AdminSettings /></Suspense>} />
                 </Route>
               </Routes>
             </CartProvider>

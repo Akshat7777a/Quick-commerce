@@ -26,7 +26,7 @@ function AuthShell({
 }) {
   return (
     <div className="container-page py-8 sm:py-14">
-      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-card shadow-soft lg:grid-cols-[1.02fr_1fr]">
+      <div className="mx-auto grid grid-cols-1 max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-card shadow-soft lg:grid-cols-[1.02fr_1fr]">
         <div className="relative hidden lg:block">
           <div className="absolute inset-0 bg-forest" />
           <div className="relative flex h-full min-h-[34rem] flex-col justify-between p-10 text-cream">

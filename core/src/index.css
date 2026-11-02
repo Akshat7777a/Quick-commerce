@@ -1,36 +1,47 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
 
+
+/*
+  Tailwind names are mapped onto the design tokens so every existing utility
+  class (bg-cream, text-ink, border-line) now resolves to the new palette.
+  Nothing below hard-codes a hex value except through a token variable.
+*/
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--lm-font);
+  --font-display: var(--lm-font);
 
-  --color-cream: #f7f4ec;
-  --color-cream-2: #efeade;
-  --color-sand: #e5dece;
-  --color-ink: #14170f;
-  --color-ink-soft: #5f6559;
-  --color-forest: #103327;
-  --color-forest-2: #1c4a38;
+  --color-cream: var(--lm-bg);
+  --color-cream-2: var(--lm-bg-soft);
+  --color-sand: #e8e3d5;
+  --color-ink: var(--lm-text);
+  --color-ink-soft: var(--lm-text-muted);
+  --color-forest: var(--lm-primary);
+  --color-forest-2: var(--lm-primary-pressed);
   --color-moss: #7b8875;
-  --color-gold: #d8a84b;
-  --color-gold-soft: #f2e6cb;
-  --color-clay: #b4552f;
-  --color-line: #e4ded1;
-  --color-card: #fffdf8;
+  --color-gold: var(--lm-accent);
+  --color-gold-soft: var(--lm-accent-soft);
+  --color-clay: var(--lm-error);
+  --color-line: var(--lm-border);
+  --color-card: var(--lm-surface);
+  --color-primary: var(--lm-primary);
+  --color-primary-tint: var(--lm-primary-tint);
+  --color-warning: var(--lm-warning);
+  --color-error: var(--lm-error);
 
-  --shadow-soft: 0 1px 2px rgb(20 23 15 / 0.04), 0 14px 32px -18px rgb(20 23 15 / 0.18);
-  --shadow-lift: 0 4px 10px rgb(20 23 15 / 0.04), 0 30px 60px -28px rgb(20 23 15 / 0.32);
+  --shadow-soft: var(--lm-shadow-sticky);
+  --shadow-lift: var(--lm-shadow-sticky);
 
-  --animate-fade-up: fade-up 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-fade-in: fade-in 0.18s ease-out both;
-  --animate-slide-in: slide-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-scale-in: scale-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-up: fade-up var(--lm-motion-base) var(--lm-ease) both;
+  --animate-fade-in: fade-in var(--lm-motion-fast) var(--lm-ease) both;
+  --animate-slide-in: slide-in var(--lm-motion-base) var(--lm-ease) both;
+  --animate-scale-in: scale-in var(--lm-motion-base) var(--lm-ease) both;
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -59,7 +70,7 @@
 @keyframes scale-in {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -73,34 +84,28 @@
   }
 
   html {
-    scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     background-color: var(--color-cream);
     color: var(--color-ink);
-    font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
+    font-family: var(--lm-font);
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-
-  ::selection {
-    background: var(--color-forest);
-    color: var(--color-cream);
+    font-size: 1rem;
+    line-height: 1.5;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.015em;
+    font-family: var(--lm-font);
+    font-weight: var(--lm-weight-semibold);
+    letter-spacing: 0;
   }
 
   :focus-visible {
-    outline: 2px solid color-mix(in oklab, var(--color-forest) 55%, transparent);
+    outline: 2px solid var(--lm-primary);
     outline-offset: 2px;
   }
 
@@ -114,8 +119,8 @@
 
   button,
   [role="button"] {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--lm-tap);
+    min-height: var(--lm-tap);
   }
 
   input[type="number"]::-webkit-inner-spin-button,
@@ -128,168 +133,188 @@
 @layer components {
   .container-page {
     width: 100%;
-    max-width: 1240px;
+    max-width: var(--lm-page-max);
     margin-inline: auto;
-    padding-inline: 1.25rem;
+    padding-inline: var(--lm-space-4);
   }
 
   @media (min-width: 640px) {
     .container-page {
-      padding-inline: 2rem;
+      padding-inline: var(--lm-space-6);
     }
   }
 
   .eyebrow {
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
+    font-size: var(--lm-text-small);
+    font-weight: var(--lm-weight-medium);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--color-ink-soft);
+    color: var(--lm-text-muted);
   }
 
   .label {
     display: block;
-    margin-bottom: 0.4rem;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--color-ink-soft);
+    margin-bottom: var(--lm-space-2);
+    font-size: var(--lm-text-small);
+    font-weight: var(--lm-weight-medium);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--lm-text-muted);
   }
 
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    border-radius: 6px;
-    padding: 0.8rem 1.4rem;
-    font-size: 1rem;
-    font-weight: 500;
+    gap: var(--lm-space-2);
+    border-radius: var(--lm-radius-control);
+    border: 1px solid transparent;
+    padding-inline: var(--lm-space-4);
+    min-height: var(--lm-tap);
+    font-size: var(--lm-text-body);
+    font-weight: var(--lm-weight-medium);
     line-height: 1.25;
-    min-height: 44px;
     white-space: nowrap;
-    transition:
-      background-color 180ms ease,
-      color 180ms ease,
-      border-color 180ms ease,
-      transform 180ms ease,
-      box-shadow 180ms ease;
     cursor: pointer;
-  }
-
-  .btn:active:not(:disabled) {
-    transform: translateY(1px);
+    transition:
+      background-color var(--lm-motion-fast) var(--lm-ease),
+      color var(--lm-motion-fast) var(--lm-ease),
+      border-color var(--lm-motion-fast) var(--lm-ease);
   }
 
   .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
   }
 
   .btn-primary {
-    background-color: var(--color-forest);
-    color: var(--color-cream);
-    box-shadow: 0 10px 24px -16px rgb(16 51 39 / 0.8);
+    background-color: var(--lm-primary);
+    color: #ffffff;
   }
 
   .btn-primary:hover:not(:disabled) {
-    background-color: var(--color-forest-2);
+    background-color: var(--lm-primary-pressed);
   }
 
   .btn-secondary {
-    background-color: transparent;
-    color: var(--color-ink);
-    border: 1px solid color-mix(in oklab, var(--color-ink) 16%, transparent);
+    background-color: var(--lm-surface);
+    color: var(--lm-text);
+    border-color: var(--lm-border);
   }
 
   .btn-secondary:hover:not(:disabled) {
-    border-color: var(--color-ink);
-    background-color: rgb(255 253 248 / 0.6);
+    border-color: var(--lm-primary);
+    color: var(--lm-primary);
+  }
+
+  .btn-tertiary {
+    background-color: transparent;
+    color: var(--lm-primary);
+    padding-inline: var(--lm-space-2);
+  }
+
+  .btn-tertiary:hover:not(:disabled) {
+    background-color: var(--lm-primary-tint);
+  }
+
+  .btn-danger {
+    background-color: var(--lm-error);
+    color: #ffffff;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    filter: brightness(0.92);
   }
 
   .btn-soft {
-    background-color: var(--color-cream-2);
-    color: var(--color-ink);
+    background-color: var(--lm-primary-tint);
+    color: var(--lm-primary);
   }
 
   .btn-soft:hover:not(:disabled) {
-    background-color: var(--color-sand);
+    background-color: #d9ebde;
   }
 
   .btn-sm {
-    padding: 0.55rem 1rem;
-    font-size: 1rem;
-    min-height: 44px;
+    padding-inline: var(--lm-space-3);
+    font-size: var(--lm-text-small);
+    min-height: 36px;
+  }
+
+  .btn-block {
+    width: 100%;
   }
 
   .input {
     width: 100%;
-    border-radius: 6px;
-    border: 1px solid var(--color-line);
-    min-height: 44px;
-    background-color: var(--color-card);
-    padding: 0.72rem 1rem;
+    border-radius: var(--lm-radius-control);
+    border: 1px solid var(--lm-border);
+    min-height: var(--lm-tap);
+    background-color: var(--lm-surface);
+    padding: 0 var(--lm-space-3);
     font-size: 1rem;
-    color: var(--color-ink);
-    transition:
-      border-color 180ms ease,
-      box-shadow 180ms ease;
+    color: var(--lm-text);
+    transition: border-color var(--lm-motion-fast) var(--lm-ease);
   }
 
   .input::placeholder {
-    color: color-mix(in oklab, var(--color-ink-soft) 65%, transparent);
+    color: var(--lm-text-disabled);
   }
 
   .input:focus {
     outline: none;
-    border-color: color-mix(in oklab, var(--color-forest) 55%, transparent);
-    box-shadow: 0 0 0 3px rgb(16 51 39 / 0.08);
+    border-color: var(--lm-primary);
   }
 
   .input:disabled {
-    opacity: 0.6;
+    background-color: var(--lm-bg);
+    color: var(--lm-text-disabled);
+  }
+
+  .input--error {
+    border-color: var(--lm-error);
+  }
+
+  .input--error:focus {
+    border-color: var(--lm-error);
   }
 
   .card {
-    background-color: var(--color-card);
-    border: 1px solid var(--color-line);
-    border-radius: 1.35rem;
+    background-color: var(--lm-surface);
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-radius-card);
   }
 
   .chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    border-radius: 6px;
-    border: 1px solid var(--color-line);
-    background-color: transparent;
-    min-height: 44px;
-    padding: 0.5rem 0.95rem;
-    font-size: 1rem;
-    color: var(--color-ink-soft);
-    transition:
-      background-color 160ms ease,
-      color 160ms ease,
-      border-color 160ms ease;
+    gap: 6px;
+    border-radius: var(--lm-radius-control);
+    border: 1px solid var(--lm-border);
+    background-color: var(--lm-surface);
+    min-height: var(--lm-tap);
+    padding: 0 var(--lm-space-3);
+    font-size: var(--lm-text-body);
+    color: var(--lm-text-muted);
     cursor: pointer;
     white-space: nowrap;
+    transition:
+      background-color var(--lm-motion-fast) var(--lm-ease),
+      color var(--lm-motion-fast) var(--lm-ease),
+      border-color var(--lm-motion-fast) var(--lm-ease);
   }
 
   .chip:hover {
-    border-color: color-mix(in oklab, var(--color-ink) 30%, transparent);
-    color: var(--color-ink);
+    border-color: var(--lm-primary);
+    color: var(--lm-text);
   }
 
-  .chip-active {
-    background-color: var(--color-forest);
-    border-color: var(--color-forest);
-    color: var(--color-cream);
-  }
-
+  .chip-active,
   .chip-active:hover {
-    background-color: var(--color-forest-2);
-    color: var(--color-cream);
+    background-color: var(--lm-primary-tint);
+    border-color: var(--lm-primary);
+    color: var(--lm-primary);
+    font-weight: var(--lm-weight-medium);
   }
 
   .price {
@@ -300,133 +325,139 @@
   .divider {
     height: 1px;
     width: 100%;
-    background-color: var(--color-line);
+    background-color: var(--lm-border);
   }
-}
 
-/* ==========================================================================
-   Dark mode: swaps the design tokens on <html class="dark">. Unlayered on
-   purpose so these win over Tailwind's @theme :root defaults.
-   ========================================================================== */
-html.dark {
-  --color-cream: #0f1511;
-  --color-cream-2: #161e18;
-  --color-sand: #1f2a23;
-  --color-ink: #ebeee6;
-  --color-ink-soft: #9ba595;
-  --color-line: #26312a;
-  --color-card: #141b16;
-  --color-forest: #22775a;
-  --color-forest-2: #2b8f68;
-  --color-moss: #8b9785;
-  --color-gold: #dcb25f;
-  --color-gold-soft: #33301f;
-  --color-clay: #d47a52;
+  /* ADD control: outlined at rest, quantity stepper once in the cart. */
+  .ui-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    height: 36px;
+    padding: 0 var(--lm-space-3);
+    border-radius: var(--lm-radius-control);
+    border: 1px solid var(--lm-primary);
+    background-color: var(--lm-surface);
+    color: var(--lm-primary);
+    font-size: var(--lm-text-small);
+    font-weight: var(--lm-weight-semibold);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background-color var(--lm-motion-fast) var(--lm-ease);
+  }
 
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 14px 32px -18px rgb(0 0 0 / 0.6);
-  --shadow-lift: 0 4px 10px rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.7);
-}
+  .ui-add:hover:not(:disabled) {
+    background-color: var(--lm-primary-tint);
+  }
 
-html.dark .btn-primary {
-  background-color: #1c6b4e;
-}
+  .ui-add:disabled {
+    border-color: var(--lm-border);
+    color: var(--lm-text-disabled);
+    cursor: not-allowed;
+  }
 
-html.dark .btn-primary:hover:not(:disabled) {
-  background-color: #22775a;
-}
+  .ui-step {
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    border-radius: var(--lm-radius-control);
+    border: 1px solid var(--lm-primary);
+    background-color: var(--lm-primary-tint);
+    color: var(--lm-primary);
+    overflow: hidden;
+  }
 
-html.dark .chip-active,
-html.dark .chip-active:hover {
-  background-color: #1c6b4e;
-  border-color: #1c6b4e;
-}
+  .ui-step button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 34px;
+    min-width: 32px;
+    min-height: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
 
-html.dark .btn-secondary:hover:not(:disabled) {
-  background-color: rgb(255 253 248 / 0.06);
-}
+  .ui-step button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 
-/* ==========================================================================
-   Festival theme presets: admin picks one, it lands as data-theme on <html>.
-   Light accents first, then the dark-mode variants (higher specificity).
-   ========================================================================== */
-html[data-theme="diwali"] {
-  --color-forest: #7a3f18;
-  --color-forest-2: #985021;
-  --color-gold: #f0b429;
-  --color-gold-soft: #f6e7c7;
-  --color-clay: #c2185b;
-}
+  .ui-step span {
+    min-width: 28px;
+    text-align: center;
+    font-size: var(--lm-text-body);
+    font-weight: var(--lm-weight-semibold);
+    font-variant-numeric: tabular-nums;
+  }
 
-html[data-theme="holi"] {
-  --color-forest: #ad1457;
-  --color-forest-2: #d81b60;
-  --color-gold: #ffb300;
-  --color-gold-soft: #ffe7b8;
-  --color-clay: #b94745;
-}
+  .ui-tag {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--lm-radius-tag);
+    background-color: var(--lm-accent);
+    color: var(--lm-text);
+    font-size: var(--lm-text-small);
+    font-weight: var(--lm-weight-semibold);
+    line-height: 1;
+  }
 
-html[data-theme="christmas"] {
-  --color-forest: #b3261e;
-  --color-forest-2: #d32f2f;
-  --color-gold: #ffd54f;
-  --color-gold-soft: #fff3c4;
-  --color-clay: #2e7d32;
-}
+  .ui-tag--muted {
+    background-color: var(--lm-bg-soft);
+    color: var(--lm-text-muted);
+    font-weight: var(--lm-weight-medium);
+  }
 
-html[data-theme="eid"] {
-  --color-forest: #00695c;
-  --color-forest-2: #00897b;
-  --color-gold: #d4af37;
-  --color-gold-soft: #f4ecd2;
-  --color-clay: #1b5e20;
-}
+  .ui-skeleton {
+    background-color: var(--lm-bg-soft);
+    border-radius: var(--lm-radius-card);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
 
-html[data-theme="republic"] {
-  --color-forest: #e65100;
-  --color-forest-2: #ef6c00;
-  --color-gold: #ffd54f;
-  --color-gold-soft: #ffecb3;
-  --color-clay: #138808;
-}
+  .ui-sheet {
+    background-color: var(--lm-surface);
+    border-top-left-radius: var(--lm-radius-sheet);
+    border-top-right-radius: var(--lm-radius-sheet);
+    box-shadow: var(--lm-shadow-sticky);
+  }
 
-html.dark[data-theme="diwali"] {
-  --color-forest: #d38a45;
-  --color-forest-2: #e3a65e;
-  --color-gold: #f0b429;
-  --color-gold-soft: #3a3021;
-  --color-clay: #e87862;
-}
+  .ui-progress {
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--lm-bg-soft);
+    overflow: hidden;
+  }
 
-html.dark[data-theme="holi"] {
-  --color-forest: #ef6f8f;
-  --color-forest-2: #f58eaa;
-  --color-gold: #ffc24d;
-  --color-gold-soft: #493028;
-  --color-clay: #e58a63;
-}
+  .ui-progress > span {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background-color: var(--lm-primary);
+    transition: width var(--lm-motion-base) var(--lm-ease);
+  }
 
-html.dark[data-theme="christmas"] {
-  --color-forest: #e05a4f;
-  --color-forest-2: #ee7a70;
-  --color-gold: #ffd54f;
-  --color-gold-soft: #453b1d;
-  --color-clay: #5cb85c;
-}
+  .ui-navtab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    font-size: var(--lm-text-small);
+    line-height: 1;
+    color: var(--lm-text-muted);
+    text-decoration: none;
+  }
 
-html.dark[data-theme="eid"] {
-  --color-forest: #2fa08e;
-  --color-forest-2: #45b7a3;
-  --color-gold: #d4af37;
-  --color-gold-soft: #3c3a22;
-  --color-clay: #5cb85c;
-}
-
-html.dark[data-theme="republic"] {
-  --color-forest: #f08a3c;
-  --color-forest-2: #f7a05c;
-  --color-gold: #ffd54f;
-  --color-gold-soft: #453a1d;
-  --color-clay: #4caf50;
+  .ui-navtab[aria-current="page"] {
+    color: var(--lm-primary);
+    font-weight: var(--lm-weight-medium);
+  }
 }
 
 @layer utilities {
@@ -444,39 +475,19 @@ html.dark[data-theme="republic"] {
   }
 
   .safe-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+    padding-bottom: max(env(safe-area-inset-bottom), var(--lm-space-2));
   }
 }
 
-/* ==========================================================================
-   Mobile readability and touch targets.
-   ========================================================================== */
 @media (max-width: 639px) {
-  body {
-    font-size: 1rem;
-  }
-
   input,
   select,
   textarea {
-    font-size: 1rem !important;
-  }
-
-  .chip {
-    height: auto;
-    min-height: 44px;
     font-size: 1rem;
-  }
-
-  .label {
-    font-size: 0.875rem;
   }
 }
 
-/* ==========================================================================
-   Reduced motion: visitors who ask their OS for less motion get instant
-   state changes, no sliding, no scaling. Everything stays fully usable.
-   ========================================================================== */
+/* Visitors who ask their OS for less motion get instant state changes. */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
@@ -484,9 +495,5 @@ html.dark[data-theme="republic"] {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-
-  html {
-    scroll-behavior: auto;
   }
 }

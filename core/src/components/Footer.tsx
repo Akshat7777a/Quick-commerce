@@ -1,80 +1,76 @@
 import { Link } from "react-router-dom";
-import { Banknote, Clock3, MapPin, Phone } from "lucide-react";
+import { Clock3, MapPin, Phone } from "lucide-react";
 import { useStoreSettings } from "../lib/store";
 import { PatchSlot } from "../lib/patch-loader";
+import { InstallButton } from "./InstallButton";
 
 export function Footer() {
   const { settings } = useStoreSettings();
 
   return (
-    <footer className="mt-20 bg-forest text-cream">
-      <div className="container-page py-14 sm:py-16">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr] lg:gap-16">
+    <footer className="border-t border-line bg-white">
+      <div className="container-page py-8">
+        <div className="grid gap-8 md:grid-cols-[1.3fr_1fr_1fr]">
           <div>
-            <Link to="/" className="inline-flex items-baseline gap-2">
-              <span className="font-display text-3xl leading-none">
-                L MART<span className="text-gold">.</span>
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.3em] text-cream/50">Online</span>
+            <Link to="/" className="inline-flex items-baseline gap-0.5" aria-label="L MART home">
+              <span className="text-[18px] font-semibold leading-6 text-ink">L MART</span>
+              <span className="text-[18px] font-semibold leading-6 text-gold">.</span>
             </Link>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-cream/65">
+            <p className="mt-2 max-w-sm text-[14px] leading-5 text-ink-soft">
               {settings.tagline ??
-                "Everyday essentials from your neighbourhood store, ordered online, paid in cash at your door."}
+                "Everyday essentials from your neighbourhood store, delivered in Nimbahera."}
             </p>
-
-            <div className="mt-6 flex flex-wrap gap-3 text-[11px] text-cream/70">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-cream/15 px-3 py-1.5">
-                <Banknote className="size-3.5" /> Cash on delivery
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-cream/15 px-3 py-1.5">
-                <Clock3 className="size-3.5" /> {settings.delivery_estimate ?? "Same-day delivery"}
-              </span>
-            </div>
+            <InstallButton className="mt-4" />
           </div>
 
           <div>
-            <h3 className="text-[10px] font-medium uppercase tracking-[0.24em] text-cream/45">Browse</h3>
-            <ul className="mt-4 space-y-2.5 text-sm text-cream/75">
-              <li><Link className="transition hover:text-gold" to="/shop">All products</Link></li>
-              <li><Link className="transition hover:text-gold" to="/offers">Offers &amp; coupons</Link></li>
-              <li><Link className="transition hover:text-gold" to="/orders">Your orders</Link></li>
-              <li><Link className="transition hover:text-gold" to="/account">Your account</Link></li>
+            <h2 className="text-[12px] font-medium leading-4 text-ink">Browse</h2>
+            <ul className="mt-2 space-y-1 text-[14px] leading-5 text-ink-soft">
+              <li><Link className="transition hover:text-ink" to="/shop">All products</Link></li>
+              <li><Link className="transition hover:text-ink" to="/categories">Categories</Link></li>
+              <li><Link className="transition hover:text-ink" to="/offers">Offers</Link></li>
+              <li><Link className="transition hover:text-ink" to="/orders">Your orders</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-[10px] font-medium uppercase tracking-[0.24em] text-cream/45">The store</h3>
-            <ul className="mt-4 space-y-3 text-sm text-cream/75">
-              <li className="flex gap-2.5">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-cream/40" />
-                <span>{settings.address ?? "Add the store address in admin"}</span>
+            <h2 className="text-[12px] font-medium leading-4 text-ink">The store</h2>
+            <ul className="mt-2 space-y-2 text-[14px] leading-5 text-ink-soft">
+              <li className="flex gap-2">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-forest" aria-hidden="true" />
+                <span>{settings.address ?? "Shop address to be added"}</span>
               </li>
-              <li className="flex gap-2.5">
-                <Phone className="mt-0.5 size-4 shrink-0 text-cream/40" />
-                <a href={`tel:${settings.phone ?? ""}`} className="transition hover:text-gold">
-                  {settings.phone ?? "Add a phone number in admin"}
-                </a>
-              </li>
-              <li className="flex gap-2.5">
-                <Clock3 className="mt-0.5 size-4 shrink-0 text-cream/40" />
+              {settings.phone ? (
+                <li className="flex gap-2">
+                  <Phone className="mt-0.5 size-4 shrink-0 text-forest" aria-hidden="true" />
+                  <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="transition hover:text-ink">
+                    {settings.phone}
+                  </a>
+                </li>
+              ) : (
+                <li>Phone number to be added</li>
+              )}
+              <li className="flex gap-2">
+                <Clock3 className="mt-0.5 size-4 shrink-0 text-forest" aria-hidden="true" />
                 <span>
-                  {settings.is_open ? "Open now" : "Currently closed"} · {settings.delivery_estimate}
+                  {settings.is_open ? "Open now" : "Closed right now"}
+                  {settings.delivery_estimate ? ` · ${settings.delivery_estimate}` : ""}
                 </span>
               </li>
+              <li>FSSAI licence: [Owner to add]</li>
             </ul>
           </div>
         </div>
 
-        {/* Optional patch line: store notice, festival greeting, etc. */}
         <PatchSlot name="footer-note" />
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-cream/10 pt-6 text-[11px] text-cream/45 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} L MART ONLINE. Made for the neighbourhood.</p>
-          <div className="flex flex-wrap items-center gap-5">
-            <Link to="/privacy" className="transition hover:text-cream/80">Privacy Policy</Link>
-            <Link to="/terms" className="transition hover:text-cream/80">Terms and Conditions</Link>
-            <Link to="/admin" className="transition hover:text-cream/80">Admin panel</Link>
-            <span>Secure checkout · Pay at your door</span>
+        <div className="mt-8 flex flex-col gap-2 border-t border-line pt-4 text-[12px] leading-4 text-ink-soft sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} L MART ONLINE</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <Link to="/privacy" className="inline-flex min-h-11 items-center transition hover:text-ink">Privacy Policy</Link>
+            <Link to="/terms" className="inline-flex min-h-11 items-center transition hover:text-ink">Terms and Conditions</Link>
+            <Link to="/refunds" className="inline-flex min-h-11 items-center transition hover:text-ink">Refund and Cancellation</Link>
+            <Link to="/account" className="inline-flex min-h-11 items-center transition hover:text-ink">Contact the store</Link>
           </div>
         </div>
       </div>

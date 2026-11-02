@@ -1,0 +1,68 @@
+/*
+  L MART design tokens: the one place visual decisions live.
+  Components must read these variables (directly or through the token-backed
+  Tailwind names mapped in index.css) and never hard-code colours, sizes,
+  radii or shadows.
+*/
+:root {
+  /* Colour */
+  --lm-bg: #f7f4ec;
+  --lm-bg-soft: #efeade;
+  --lm-surface: #ffffff;
+  --lm-primary: #1e7b3c;
+  --lm-primary-pressed: #155d2c;
+  --lm-primary-tint: #e7f3ea;
+  --lm-accent: #f5c542;
+  --lm-accent-soft: #fdf3d7;
+  --lm-text: #1a1a1a;
+  --lm-text-muted: #5f5f5f;
+  --lm-text-disabled: #9a9a9a;
+  --lm-border: #e6e1d3;
+  --lm-success: #1e7b3c;
+  --lm-warning: #8a5200;
+  --lm-error: #c62828;
+
+  /* Type */
+  --lm-font: "Inter", "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --lm-text-page: 1.25rem; /* 20px, 28px line */
+  --lm-leading-page: 1.75rem;
+  --lm-text-section: 1.125rem; /* 18px, 24px line */
+  --lm-leading-section: 1.5rem;
+  --lm-text-body: 0.875rem; /* 14px, 20px line */
+  --lm-leading-body: 1.25rem;
+  --lm-text-small: 0.75rem; /* 12px, 16px line */
+  --lm-leading-small: 1rem;
+  --lm-text-price: 1rem;
+  --lm-weight-regular: 400;
+  --lm-weight-medium: 500;
+  --lm-weight-semibold: 600;
+
+  /* Space: 4px base */
+  --lm-space-1: 4px;
+  --lm-space-2: 8px;
+  --lm-space-3: 12px;
+  --lm-space-4: 16px;
+  --lm-space-5: 20px;
+  --lm-space-6: 24px;
+  --lm-space-7: 32px;
+  --lm-space-8: 40px;
+
+  /* Shape */
+  --lm-radius-card: 12px;
+  --lm-radius-control: 8px;
+  --lm-radius-sheet: 16px;
+  --lm-radius-tag: 4px;
+
+  /* Elevation: one soft shadow, sticky bars and sheets only */
+  --lm-shadow-sticky: 0 2px 8px rgb(0 0 0 / 0.06);
+
+  /* Motion: short and functional only */
+  --lm-motion-fast: 150ms;
+  --lm-motion-base: 180ms;
+  --lm-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layout */
+  --lm-page-max: 1200px;
+  --lm-tap: 44px;
+}

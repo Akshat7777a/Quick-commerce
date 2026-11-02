@@ -10,10 +10,11 @@ import {
 import { CheckCircle2, Info, X, AlertCircle } from "lucide-react";
 
 type ToastKind = "success" | "error" | "info";
-type Toast = { id: number; message: string; kind: ToastKind };
+type ToastAction = { label: string; onClick: () => void };
+type Toast = { id: number; message: string; kind: ToastKind; action?: ToastAction };
 
 type ToastContextValue = {
-  toast: (message: string, kind?: ToastKind) => void;
+  toast: (message: string, kind?: ToastKind, action?: ToastAction) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -27,10 +28,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toast = useCallback(
-    (message: string, kind: ToastKind = "success") => {
+    (message: string, kind: ToastKind = "success", action?: ToastAction) => {
       const id = ++counter.current;
-      setToasts((current) => [...current.slice(-2), { id, message, kind }]);
-      window.setTimeout(() => dismiss(id), 4200);
+      setToasts((current) => [...current.slice(-2), { id, message, kind, action }]);
+      window.setTimeout(() => dismiss(id), action ? 6000 : 4200);
     },
     [dismiss],
   );
@@ -57,6 +58,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               )}
             </span>
             <p className="flex-1 text-sm leading-snug text-ink">{item.message}</p>
+            {item.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  item.action?.onClick();
+                  dismiss(item.id);
+                }}
+                className="shrink-0 text-[12px] font-semibold text-forest underline underline-offset-2"
+              >
+                {item.action.label}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => dismiss(item.id)}
